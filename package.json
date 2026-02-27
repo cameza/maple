@@ -9,6 +9,7 @@
     "sync:prototype": "node scripts/sync-prototype.mjs"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.6.1",
     "next": "15.5.12",
     "openai": "^4.104.0",
     "react": "19.0.0",
