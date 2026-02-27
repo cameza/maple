@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Comprehension Check</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#ecb613",
+              "background-light": "#f8f8f6",
+              "card-light": "#FFFFFF",
+            },
+            fontFamily: {
+              sans: ["Manrope", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background-light text-slate-900 font-sans min-h-screen">
+    <main class="max-w-md mx-auto px-6 pt-12 pb-8 min-h-screen flex flex-col">
+      <header>
+        <p class="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Before confirmation</p>
+        <h1 class="text-3xl font-semibold mt-3 leading-tight">Quick comprehension check</h1>
+        <p class="text-slate-600 mt-3">
+          We want to confirm the plan is clear. These checks keep the human decision boundary explicit.
+        </p>
+      </header>
+
+      <section class="mt-8 space-y-4 flex-1">
+        <article class="bg-card-light rounded-2xl border border-slate-200 p-5">
+          <p class="font-semibold">1) Who executes transfers or payments?</p>
+          <label class="flex items-center gap-3 mt-3">
+            <input type="radio" name="q1" value="wrong" class="text-primary" />
+            <span>The AI executes them after plan generation</span>
+          </label>
+          <label class="flex items-center gap-3 mt-2">
+            <input type="radio" name="q1" value="correct" class="text-primary" />
+            <span>I decide and execute every action myself</span>
+          </label>
+        </article>
+
+        <article class="bg-card-light rounded-2xl border border-slate-200 p-5">
+          <p class="font-semibold">2) What happens if your income changes?</p>
+          <label class="flex items-center gap-3 mt-3">
+            <input type="radio" name="q2" value="correct" class="text-primary" />
+            <span>I run a return check-in and regenerate the plan</span>
+          </label>
+          <label class="flex items-center gap-3 mt-2">
+            <input type="radio" name="q2" value="wrong" class="text-primary" />
+            <span>The existing plan auto-trades between my accounts</span>
+          </label>
+        </article>
+
+        <article class="bg-card-light rounded-2xl border border-slate-200 p-5">
+          <p class="font-semibold">3) Where do contribution limits come from?</p>
+          <label class="flex items-center gap-3 mt-3">
+            <input type="radio" name="q3" value="correct" class="text-primary" />
+            <span>My provided data, with CRA room checks before large deposits</span>
+          </label>
+          <label class="flex items-center gap-3 mt-2">
+            <input type="radio" name="q3" value="wrong" class="text-primary" />
+            <span>Always-real-time bank APIs in this prototype</span>
+          </label>
+        </article>
+      </section>
+
+      <footer class="pt-6">
+        <p id="score-text" class="text-sm text-slate-600 mb-3"></p>
+        <a
+          id="continue-link"
+          href="screen9_action_confirmation.html"
+          class="w-full inline-flex justify-center bg-slate-300 text-slate-500 py-4 rounded-full font-semibold pointer-events-none"
+        >
+          Continue to action confirmation
+        </a>
+      </footer>
+    </main>
+
+    <script>
+      const continueLink = document.getElementById("continue-link");
+      const scoreText = document.getElementById("score-text");
+
+      function evaluate() {
+        const answers = ["q1", "q2", "q3"].map((name) => {
+          const selected = document.querySelector(`input[name="${name}"]:checked`);
+          return selected ? selected.value : null;
+        });
+
+        const total = answers.filter(Boolean).length;
+        const correct = answers.filter((v) => v === "correct").length;
+
+        scoreText.textContent = total === 3 ? `Score: ${correct}/3` : "Answer all 3 checks to continue.";
+
+        if (total === 3 && correct >= 2) {
+          localStorage.setItem("ws_comprehension_passed", "yes");
+          continueLink.className = "w-full inline-flex justify-center bg-slate-900 text-white py-4 rounded-full font-semibold";
+        } else {
+          localStorage.removeItem("ws_comprehension_passed");
+          continueLink.className = "w-full inline-flex justify-center bg-slate-300 text-slate-500 py-4 rounded-full font-semibold pointer-events-none";
+        }
+      }
+
+      document.querySelectorAll("input[type='radio']").forEach((input) => {
+        input.addEventListener("change", evaluate);
+      });
+      evaluate();
+    </script>
+  </body>
+</html>

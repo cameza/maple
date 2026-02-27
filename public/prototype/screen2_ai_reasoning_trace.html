@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Planning - Reasoning Trace</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:ital@0;1&amp;family=Manrope:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>tailwind.config = {darkMode: "class", theme: {extend: {colors: {primary: "#ecb613", "background-light": "#f8f8f6", "background-dark": "#221d10", "ws-gold": "#C5A059"}, fontFamily: {display: "Manrope", sans: ["Inter", "sans-serif"]}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, animation: {"pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite", float: "float 6s ease-in-out infinite", "spin-slow": "spin 12s linear infinite"}, keyframes: {float: {"0%, 100%": {transform: "translateY(0px)"}, "50%": {transform: "translateY(-20px)"}}}}}};</script>
+<style>
+        @keyframes fadeInOut {
+            0%, 10% { opacity: 0; transform: translateY(10px); }
+            20%, 80% { opacity: 1; transform: translateY(0); }
+            90%, 100% { opacity: 0; transform: translateY(-10px); }
+        }
+        .reasoning-step {
+            animation: fadeInOut 4s infinite;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+        }
+        .dark .glass {
+            background: rgba(0, 0, 0, 0.4);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-sans text-primary dark:text-white transition-colors duration-500">
+<div class="h-12 w-full flex justify-between items-center px-8 pt-4">
+<div class="text-xs font-semibold">9:41</div>
+<div class="flex gap-1.5 items-center">
+<div class="w-4 h-4 rounded-full border border-current opacity-50"></div>
+<div class="w-4 h-4 rounded-full border border-current opacity-50"></div>
+<div class="w-6 h-3 rounded-sm border border-current opacity-50 relative">
+<div class="absolute inset-y-0.5 left-0.5 right-1.5 bg-current rounded-sm"></div>
+</div>
+</div>
+</div>
+<main class="flex flex-col items-center justify-center min-h-[85vh] px-8 text-center">
+<div class="relative w-64 h-64 mb-16 flex items-center justify-center">
+<div class="absolute inset-0 bg-ws-gold/20 blur-[80px] rounded-full animate-pulse-slow"></div>
+<div class="relative animate-float">
+<div class="absolute -inset-4 border-[0.5px] border-ws-gold/30 rounded-full animate-spin-slow"></div>
+<div class="w-32 h-32 bg-gradient-to-br from-ws-gold via-yellow-200 to-ws-gold rounded-full shadow-2xl flex items-center justify-center relative overflow-hidden">
+<div class="absolute inset-0 bg-white/20 skew-x-12 translate-x-[-100%] animate-[shimmer_3s_infinite]"></div>
+<div class="w-24 h-24 border-2 border-white/30 rounded-full flex items-center justify-center">
+<span class="text-white/80 font-display text-4xl italic">w</span>
+</div>
+</div>
+<div class="absolute -top-4 -right-2 w-8 h-8 glass rounded-full flex items-center justify-center shadow-lg">
+<div class="w-4 h-4 bg-ws-gold rounded-full opacity-60"></div>
+</div>
+<div class="absolute -bottom-8 -left-4 w-12 h-12 glass rounded-full flex items-center justify-center shadow-lg delay-700">
+<div class="w-6 h-6 bg-ws-gold/40 rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<h2 class="font-display text-4xl italic leading-tight text-primary dark:text-gray-100">
+                Building your <br/> financial future
+            </h2>
+<div class="h-12 relative flex items-center justify-center overflow-hidden">
+<div class="absolute w-full flex flex-col items-center" id="trace-container">
+<p class="reasoning-step text-sm font-medium tracking-wide text-ws-gold uppercase" id="step-text">
+                        Analyzing your income runway...
+                    </p>
+</div>
+</div>
+</div>
+<div class="mt-24 w-48 h-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary dark:bg-ws-gold w-0 transition-all duration-1000 ease-out" id="progress-bar"></div>
+</div>
+</main>
+<footer class="fixed bottom-12 w-full text-center px-12">
+<p class="text-xs text-gray-400 dark:text-gray-500 max-w-xs mx-auto">
+            This takes a moment. We are applying deterministic projections for debt payoff, account room, and cash flow so you can review and decide.
+        </p>
+</footer>
+<script src="agent_core.js"></script>
+<script>
+        const steps = [
+            'Analyzing your income runway...',
+            'Sequencing your registered accounts...',
+            'Calculating opportunity cost of unused FHSA room...',
+            'Optimizing TFSA vs RRSP contributions...',
+            'Checking Canadian tax bracket context...',
+            'Finalizing your monthly bucket split...',
+            'Finalizing your personalized plan...'
+        ];
+        let currentStep = 0;
+        const textElement = document.getElementById('step-text');
+        const progressBar = document.getElementById('progress-bar');
+        function updateStep() {
+            currentStep = (currentStep + 1) % steps.length;
+            // Artificial "progress"
+            const progress = ((currentStep + 1) / steps.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            // We let the CSS animation handle the fade, just swap text mid-way
+            setTimeout(() => {
+                textElement.innerText = steps[currentStep];
+            }, 500); // Small delay to sync with opacity dip
+        }
+        // Cycle through steps every 4 seconds (matching CSS animation)
+        setInterval(updateStep, 4000);
+
+        const snapshot = window.MaplePlanEngine.buildSnapshotFromStorage();
+        const plan = window.MaplePlanEngine.generatePlan(snapshot);
+        localStorage.setItem("ws_plan_payload", JSON.stringify(plan));
+
+        setTimeout(() => {
+            window.location.href = "screen6_financial_plan_summary.html";
+        }, 6000);
+
+        // Shimmer effect CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shimmer {
+                0% { transform: translateX(-150%) skewX(-15deg); }
+                50% { transform: translateX(150%) skewX(-15deg); }
+                100% { transform: translateX(150%) skewX(-15deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body></html>

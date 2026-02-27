@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Return Check-In</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#ecb613",
+              "background-light": "#f8f8f6",
+              "card-light": "#FFFFFF",
+            },
+            fontFamily: {
+              sans: ["Manrope", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background-light text-slate-900 font-sans min-h-screen">
+    <main class="max-w-md mx-auto px-6 pt-12 pb-8 min-h-screen flex flex-col">
+      <header>
+        <p class="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Return check-in</p>
+        <h1 class="text-3xl font-semibold mt-3 leading-tight">Refresh your plan with new numbers</h1>
+        <p class="text-slate-600 mt-3">Update the fields that changed. We regenerate recommendations, then you decide what to execute.</p>
+      </header>
+
+      <section class="mt-8 space-y-5 flex-1">
+        <article class="bg-card-light rounded-2xl border border-slate-200 p-5">
+          <label class="text-sm font-semibold">Monthly take-home pay (CAD)</label>
+          <input id="checkin-income" type="number" class="w-full mt-2 border border-slate-200 rounded-xl px-4 py-3" placeholder="6200" />
+        </article>
+
+        <article class="bg-card-light rounded-2xl border border-slate-200 p-5">
+          <label class="text-sm font-semibold">Recent change</label>
+          <select id="change-type" class="w-full mt-2 border border-slate-200 rounded-xl px-4 py-3">
+            <option value="income_up">Income increased</option>
+            <option value="income_down">Income decreased</option>
+            <option value="new_debt">New debt added</option>
+            <option value="goal_shift">Goal timeline changed</option>
+          </select>
+        </article>
+
+        <article class="bg-card-light rounded-2xl border border-slate-200 p-5">
+          <h2 class="font-semibold">What regeneration updates</h2>
+          <ul class="list-disc pl-5 mt-3 text-sm text-slate-600 space-y-1">
+            <li>Debt payoff timeline</li>
+            <li>Account sequencing (FHSA, TFSA, RRSP)</li>
+            <li>4-bucket allocation and opportunity cost estimates</li>
+          </ul>
+        </article>
+      </section>
+
+      <footer class="pt-6 space-y-3">
+        <button id="regenerate-button" class="w-full bg-slate-900 text-white py-4 rounded-full font-semibold" type="button">
+          Regenerate plan with these updates
+        </button>
+        <a href="screen1_planner_home.html" class="w-full inline-flex justify-center bg-slate-200 text-slate-700 py-4 rounded-full font-semibold">
+          Return to home
+        </a>
+      </footer>
+    </main>
+
+    <script src="agent_core.js"></script>
+    <script>
+      const incomeInput = document.getElementById("checkin-income");
+      const regenerateButton = document.getElementById("regenerate-button");
+      const changeType = document.getElementById("change-type");
+
+      const currentIncome = localStorage.getItem("ws_monthly_income") || "6200";
+      incomeInput.value = currentIncome;
+
+      regenerateButton.addEventListener("click", () => {
+        const newIncome = Number(incomeInput.value || currentIncome);
+        localStorage.setItem("ws_monthly_income", String(newIncome));
+        localStorage.setItem("ws_last_checkin_change", changeType.value);
+
+        const snapshot = window.MaplePlanEngine.buildSnapshotFromStorage();
+        const regeneratedPlan = window.MaplePlanEngine.generatePlan(snapshot);
+        localStorage.setItem("ws_plan_payload", JSON.stringify(regeneratedPlan));
+
+        window.location.href = "screen6_financial_plan_summary.html";
+      });
+    </script>
+  </body>
+</html>

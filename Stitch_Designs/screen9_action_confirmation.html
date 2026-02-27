@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Action Confirmation</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#ecb613",
+              "background-light": "#f8f8f6",
+              "card-light": "#FFFFFF",
+            },
+            fontFamily: {
+              sans: ["Manrope", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background-light text-slate-900 font-sans min-h-screen">
+    <main class="max-w-md mx-auto px-6 pt-12 pb-8 min-h-screen flex flex-col">
+      <header>
+        <p class="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Human approval</p>
+        <h1 class="text-3xl font-semibold mt-3 leading-tight">Confirm your next steps</h1>
+        <p class="text-slate-600 mt-3">The plan is ready. Choose what you want to do this month. Nothing executes automatically.</p>
+      </header>
+
+      <section class="mt-8 space-y-3 flex-1" id="actions-list"></section>
+
+      <section class="mt-5 bg-card-light rounded-2xl border border-slate-200 p-5">
+        <label class="flex items-start gap-3">
+          <input id="human-confirmation" type="checkbox" class="mt-1 text-primary" />
+          <span class="text-sm text-slate-700">
+            I understand this app provides guidance only. I will choose and execute all transfers, payments, and contributions myself.
+          </span>
+        </label>
+      </section>
+
+      <footer class="pt-6">
+        <a
+          id="finalize-link"
+          href="screen10_return_checkin.html"
+          class="w-full inline-flex justify-center bg-slate-300 text-slate-500 py-4 rounded-full font-semibold pointer-events-none"
+        >
+          Finalize plan and set check-in
+        </a>
+      </footer>
+    </main>
+
+    <script src="agent_core.js"></script>
+    <script>
+      const payload = JSON.parse(localStorage.getItem("ws_plan_payload") || "null") || window.MaplePlanEngine.generatePlan(window.MaplePlanEngine.buildSnapshotFromStorage());
+      const actionsList = document.getElementById("actions-list");
+      const confirmation = document.getElementById("human-confirmation");
+      const finalizeLink = document.getElementById("finalize-link");
+
+      payload.actions.forEach((action, index) => {
+        const card = document.createElement("article");
+        card.className = "bg-card-light rounded-2xl border border-slate-200 p-5";
+        card.innerHTML = `
+          <p class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Action ${index + 1}</p>
+          <h2 class="text-lg font-semibold mt-1">${action.title}</h2>
+          <p class="text-sm text-slate-600 mt-2">${action.why}</p>
+        `;
+        actionsList.appendChild(card);
+      });
+
+      confirmation.addEventListener("change", () => {
+        if (confirmation.checked) {
+          localStorage.setItem("ws_actions_confirmed", "yes");
+          finalizeLink.className = "w-full inline-flex justify-center bg-slate-900 text-white py-4 rounded-full font-semibold";
+        } else {
+          localStorage.removeItem("ws_actions_confirmed");
+          finalizeLink.className = "w-full inline-flex justify-center bg-slate-300 text-slate-500 py-4 rounded-full font-semibold pointer-events-none";
+        }
+      });
+    </script>
+  </body>
+</html>

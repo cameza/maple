@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Your Financial Plan Summary</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&amp;family=Manrope:wght@300;400;500;600&amp;family=Manrope:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>tailwind.config = {darkMode: "class", theme: {extend: {colors: {primary: "#ecb613", "background-light": "#f8f8f6", "background-dark": "#221d10", "card-light": "#FFFFFF", "card-dark": "#1E1E1E"}, fontFamily: {display: "Manrope", sans: ["Inter", "sans-serif"]}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .donut-ring {
+            transform: rotate(-90deg);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen">
+<div class="h-12 w-full"></div>
+<header class="px-6 flex justify-between items-center mb-8">
+<button class="p-2 -ml-2">
+<span class="material-symbols-outlined text-2xl">arrow_back_ios</span>
+</button>
+<h1 class="font-display text-xl font-semibold tracking-tight">Your Plan</h1>
+<button class="p-2 -mr-2">
+<span class="material-symbols-outlined text-2xl">more_horiz</span>
+</button>
+</header>
+<main class="px-6 pb-24">
+<div class="mb-10">
+<h2 class="font-display text-4xl leading-tight mb-3">The 3 Actions</h2>
+<p class="text-slate-500 dark:text-slate-400 text-lg font-light leading-relaxed">
+                Layer 1 of 3. Based on your goals and current numbers, these are your highest impact moves for this month.
+            </p>
+</div>
+<div class="space-y-4 mb-12">
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1.5 h-full bg-primary"></div>
+<div class="flex justify-between items-start">
+<div class="space-y-1">
+<span class="text-[10px] font-bold uppercase tracking-widest text-primary mb-1 block">Priority 01</span>
+<h3 class="text-xl font-medium leading-snug" id="action-1-title">Set monthly debt action</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1" id="action-1-sub">Numbers load from your intake inputs.</p>
+</div>
+<span class="material-symbols-outlined text-slate-300 dark:text-slate-600">expand_more</span>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+<div class="flex justify-between items-start">
+<div class="space-y-1">
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 block">Priority 02</span>
+<h3 class="text-xl font-medium leading-snug" id="action-2-title">Set monthly registered contribution</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1" id="action-2-sub">Order adapts to debt, room, and goals.</p>
+</div>
+<span class="material-symbols-outlined text-slate-300 dark:text-slate-600">expand_more</span>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+<div class="flex justify-between items-start">
+<div class="space-y-1">
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 block">Priority 03</span>
+<h3 class="text-xl font-medium leading-snug" id="action-3-title">Set bucket guardrails</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1" id="action-3-sub">Protect consistency and behavior follow-through.</p>
+</div>
+<span class="material-symbols-outlined text-slate-300 dark:text-slate-600">expand_more</span>
+</div>
+</div>
+</div>
+<section class="mb-12">
+<div class="mb-6">
+<h3 class="font-display text-3xl mb-2">Why these actions</h3>
+<p class="text-slate-500 dark:text-slate-400 text-base font-light">Layer 2 of 3. Each action is tied to your numbers.</p>
+</div>
+<div class="space-y-4">
+<article class="bg-card-light dark:bg-card-dark p-5 rounded-2xl border border-slate-100 dark:border-slate-800">
+<h4 class="font-semibold mb-2">Action 1 reasoning</h4>
+<p class="text-sm text-slate-600 dark:text-slate-300" id="reason-1"></p>
+</article>
+<article class="bg-card-light dark:bg-card-dark p-5 rounded-2xl border border-slate-100 dark:border-slate-800">
+<h4 class="font-semibold mb-2">Action 2 reasoning</h4>
+<p class="text-sm text-slate-600 dark:text-slate-300" id="reason-2"></p>
+</article>
+<article class="bg-card-light dark:bg-card-dark p-5 rounded-2xl border border-slate-100 dark:border-slate-800">
+<h4 class="font-semibold mb-2">Action 3 reasoning</h4>
+<p class="text-sm text-slate-600 dark:text-slate-300" id="reason-3"></p>
+</article>
+</div>
+</section>
+<section class="mt-16">
+<div class="mb-8">
+<h3 class="font-display text-3xl mb-2">4-Bucket Allocation</h3>
+<p class="text-slate-500 dark:text-slate-400 text-base font-light">Layer 3 of 3. Full detail for your cash flow and next-level progress.</p>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-[32px] p-8 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center">
+<div class="relative w-64 h-64 mb-10 flex items-center justify-center">
+<svg class="w-full h-full donut-ring" viewbox="0 0 100 100">
+<circle class="dark:stroke-slate-800" cx="50" cy="50" fill="transparent" r="40" stroke="#E5E7EB" stroke-width="12"></circle>
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#C8A15B" stroke-dasharray="251.2" stroke-dashoffset="150" stroke-linecap="round" stroke-width="12"></circle>
+<circle class="dark:stroke-white" cx="50" cy="50" fill="transparent" r="40" stroke="#1A1A1A" stroke-dasharray="251.2" stroke-dashoffset="200" stroke-linecap="round" stroke-width="12" transform="rotate(90 50 50)"></circle>
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#94A3B8" stroke-dasharray="251.2" stroke-dashoffset="220" stroke-linecap="round" stroke-width="12" transform="rotate(200 50 50)"></circle>
+<circle cx="50" cy="50" fill="transparent" r="40" stroke="#D1D5DB" stroke-dasharray="251.2" stroke-dashoffset="240" stroke-linecap="round" stroke-width="12" transform="rotate(280 50 50)"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-xs uppercase tracking-tighter text-slate-400 font-semibold">Total Capital</span>
+<span class="text-2xl font-display font-bold" id="take-home-value">$0</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-x-8 gap-y-6 w-full">
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<div>
+<p class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Fixed</p>
+<p class="text-lg font-medium" id="bucket-fixed">0%</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-slate-900 dark:bg-white"></div>
+<div>
+<p class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Investments</p>
+<p class="text-lg font-medium" id="bucket-investments">0%</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-slate-400"></div>
+<div>
+<p class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Savings</p>
+<p class="text-lg font-medium" id="bucket-savings">0%</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+<div>
+<p class="text-xs text-slate-500 uppercase tracking-wider font-semibold">Guilt-Free</p>
+<p class="text-lg font-medium" id="bucket-guilt-free">0%</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="mt-8 bg-card-light dark:bg-card-dark p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
+<h3 class="text-xl font-semibold mb-4">Detail and assumptions</h3>
+<div class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+<p id="detail-debt"></p>
+<p id="detail-sequence"></p>
+<p id="detail-opportunity"></p>
+<p id="detail-level"></p>
+<ul class="list-disc pl-5 space-y-1" id="assumptions-list"></ul>
+</div>
+</section>
+<div class="mt-12">
+<a class="w-full inline-flex justify-center bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 py-5 rounded-2xl font-semibold text-lg hover:opacity-90 transition-opacity" href="screen8_comprehension_check.html">
+                Review and confirm my decisions
+            </a>
+<p class="text-center text-slate-400 text-xs mt-4 leading-relaxed px-8">
+                This plan does not execute transactions. You choose each action and complete it yourself.
+            </p>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-8 py-4 flex justify-between items-center z-50">
+<span class="material-symbols-outlined text-slate-400">home</span>
+<span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+<span class="material-symbols-outlined text-slate-400">trending_up</span>
+<span class="material-symbols-outlined text-slate-400">person</span>
+</nav>
+<script src="agent_core.js"></script>
+<script>
+  const fallbackSnapshot = window.MaplePlanEngine.buildSnapshotFromStorage();
+  const payload = JSON.parse(localStorage.getItem("ws_plan_payload") || "null") || window.MaplePlanEngine.generatePlan(fallbackSnapshot);
+
+  const actionTitles = ["action-1-title", "action-2-title", "action-3-title"];
+  const actionSubs = ["action-1-sub", "action-2-sub", "action-3-sub"];
+  const reasons = ["reason-1", "reason-2", "reason-3"];
+
+  payload.actions.forEach((action, index) => {
+    const titleNode = document.getElementById(actionTitles[index]);
+    const subNode = document.getElementById(actionSubs[index]);
+    const reasonNode = document.getElementById(reasons[index]);
+    if (titleNode) titleNode.textContent = action.title;
+    if (subNode) subNode.textContent = `Priority backed by your current monthly profile.`;
+    if (reasonNode) reasonNode.textContent = action.why;
+  });
+
+  document.getElementById("bucket-fixed").textContent = `${payload.buckets.ratios.fixed}%`;
+  document.getElementById("bucket-investments").textContent = `${payload.buckets.ratios.investments}%`;
+  document.getElementById("bucket-savings").textContent = `${payload.buckets.ratios.savings}%`;
+  document.getElementById("bucket-guilt-free").textContent = `${payload.buckets.ratios.guiltFree}%`;
+  document.getElementById("take-home-value").textContent = window.MaplePlanEngine.formatCurrency(fallbackSnapshot.takeHomeMonthly);
+
+  document.getElementById("detail-debt").textContent = `Debt roadmap: ${payload.debtProjection.strategy} payoff in about ${payload.debtProjection.months} months with ${window.MaplePlanEngine.formatCurrency(payload.debtProjection.totalInterest)} estimated interest.`;
+  document.getElementById("detail-sequence").textContent = `Account sequence: ${payload.accountSequence.join(" -> ")}.`;
+  document.getElementById("detail-opportunity").textContent = `Opportunity cost estimate: delaying registered contributions by one year can reduce 20-year value by about ${window.MaplePlanEngine.formatCurrency(payload.opportunity)}.`;
+  document.getElementById("detail-level").textContent = `Financial level: Level ${payload.level.level} (${payload.level.name}). Next milestone: ${payload.level.next}`;
+
+  const assumptionsList = document.getElementById("assumptions-list");
+  payload.assumptions.forEach((assumption) => {
+    const item = document.createElement("li");
+    item.textContent = assumption;
+    assumptionsList.appendChild(item);
+  });
+</script>
+</body></html>

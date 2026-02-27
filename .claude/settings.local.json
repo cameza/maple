@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx playwright --version)",
+      "Bash(npx playwright screenshot --viewport-size=\"390,844\" \"http://localhost:3002\" /tmp/mp_home.png)",
+      "Bash(npx playwright install chromium)"
+    ]
+  }
+}

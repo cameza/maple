@@ -1,0 +1,45 @@
+# WS Challenge Windsurf Rules
+
+## Context and Source of Truth
+- Before substantial implementation changes, review the latest PRD context.
+- Keep `ChallengeOverview.md` and `FinancialPlanningAgent.md` aligned with implemented behavior.
+- If guidance conflicts, follow the latest PRD text provided by the user in-session.
+
+## Writing and Communication
+- Keep language simple and direct.
+- Do not use em dashes.
+- Prefer short sentences and concrete examples.
+- When data is missing, state assumptions explicitly.
+
+## Product and Domain Constraints
+- Keep all guidance Canada-specific.
+- Handle TFSA, RRSP, FHSA, HBP, debt APR trade-offs, and CRA contribution room constraints accurately.
+- Respect v1 out-of-scope boundaries (no live bank integrations, no portfolio management, no tax filing workflows).
+
+## Human and AI Boundary
+- AI can explain, prioritize, and teach.
+- AI cannot execute, initiate, or recommend executing transactions.
+- Every actionable step must be presented as a human decision.
+
+## Implementation Standards
+- Use deterministic calculators for payoff projections, contribution room math, cash flow allocation, and opportunity cost.
+- Keep recommendations tied to user numbers, not generic advice.
+- Keep default plan output at grade 8 readability.
+- For household plans, support spouse-aware account prioritization and explanation.
+
+## UX and Flow Expectations
+- Include prep checklist before intake.
+- Include individual vs household branch before intake.
+- Preserve intake progress visibility.
+- Use visible reasoning trace during plan generation.
+- Include comprehension check after plan reveal.
+- Include explicit action confirmation.
+- Support return check-in with plan regeneration.
+
+## Final Quality Pass
+Before marking work complete, verify:
+1. Challenge fit and required human/AI boundary
+2. Plain language and no em dashes
+3. Quantified outputs where claims are numeric
+4. Clear scale risks and mitigations where relevant
+5. Consistency across UI copy, agent outputs, and written explanation

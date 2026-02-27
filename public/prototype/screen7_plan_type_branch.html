@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Choose Plan Type</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#ecb613",
+              "background-light": "#f8f8f6",
+              "background-dark": "#221d10",
+              "card-light": "#FFFFFF",
+              "card-dark": "#1C1C1E",
+            },
+            fontFamily: {
+              display: "Manrope",
+              sans: ["Manrope", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background-light text-slate-900 font-sans min-h-screen">
+    <main class="max-w-md mx-auto px-6 pt-12 pb-10 min-h-screen flex flex-col">
+      <header class="mb-10">
+        <p class="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Before intake</p>
+        <h1 class="text-4xl leading-tight font-semibold mt-3">Who is this plan for?</h1>
+        <p class="text-slate-600 mt-4 leading-relaxed">
+          Choose a plan type first. This changes account sequencing and action priorities.
+        </p>
+      </header>
+
+      <div class="space-y-4 flex-1">
+        <button
+          data-plan-type="individual"
+          class="plan-option w-full text-left p-6 rounded-2xl border-2 border-primary bg-card-light shadow-sm"
+        >
+          <p class="text-sm uppercase tracking-wider text-primary font-semibold">Individual</p>
+          <h2 class="text-xl font-semibold mt-1">My personal plan</h2>
+          <p class="text-sm text-slate-600 mt-2">One income profile. One set of accounts. One action roadmap.</p>
+        </button>
+
+        <button
+          data-plan-type="household"
+          class="plan-option w-full text-left p-6 rounded-2xl border border-slate-200 bg-card-light"
+        >
+          <p class="text-sm uppercase tracking-wider text-slate-500 font-semibold">Household</p>
+          <h2 class="text-xl font-semibold mt-1">My household plan</h2>
+          <p class="text-sm text-slate-600 mt-2">Combined cash flow and spouse-aware account prioritization.</p>
+        </button>
+      </div>
+
+      <footer class="mt-8">
+        <a
+          id="continue-link"
+          href="screen4_ai_conversational_intake.html"
+          class="w-full inline-flex items-center justify-center bg-slate-900 text-white py-4 rounded-full font-semibold"
+        >
+          Continue to intake
+        </a>
+        <p class="text-xs text-slate-500 mt-4 text-center">
+          You can switch this later from check-in if your situation changes.
+        </p>
+      </footer>
+    </main>
+
+    <script>
+      const options = document.querySelectorAll(".plan-option");
+      function setActive(type) {
+        localStorage.setItem("ws_plan_type", type);
+        options.forEach((option) => {
+          const active = option.dataset.planType === type;
+          option.classList.toggle("border-2", active);
+          option.classList.toggle("border-primary", active);
+          option.classList.toggle("shadow-sm", active);
+          option.classList.toggle("border", !active);
+          option.classList.toggle("border-slate-200", !active);
+        });
+      }
+
+      options.forEach((option) => {
+        option.addEventListener("click", () => setActive(option.dataset.planType));
+      });
+
+      setActive(localStorage.getItem("ws_plan_type") || "individual");
+    </script>
+  </body>
+</html>
