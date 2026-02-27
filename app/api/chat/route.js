@@ -312,6 +312,46 @@ function nextFallbackStep(currentPhase, collectedData, latestUserText) {
   };
 }
 
+function helperPhaseContext(currentPhase) {
+  const phaseHelp = {
+    profile: "Profile fields: main goal, age, province, and first-time homebuyer status. Explain each field plainly and why it affects a Canadian plan.",
+    income: "Income fields: monthly take-home income after tax and income stability (stable, variable, at-risk). Clarify what to include and what to exclude.",
+    expenses: "Expenses fields: monthly CAD amounts for housing, transport, utilities, groceries, other fixed, and discretionary. Explain examples for each category.",
+    debts: "Debt fields: whether user has debt, then debt name, balance, APR, and minimum payment. Explain APR and minimum payment with simple examples.",
+    accounts: "Accounts fields: TFSA, RRSP, and FHSA has-account status, balance, and CRA contribution room. Explain contribution room, over-contribution risk, and when each account matters.",
+    savings: "Savings fields: emergency fund amount and current monthly savings. Explain emergency fund purpose and practical target ranges.",
+  };
+
+  return phaseHelp[currentPhase] || "Explain the current intake section fields in plain language.";
+}
+
+function helperFallbackMessage(currentPhase, latestUserText) {
+  const question = (latestUserText || "").toLowerCase();
+
+  if (currentPhase === "expenses" && (question.includes("other fixed") || question.includes("fixed"))) {
+    return "In this section, other fixed means recurring monthly bills that are not housing, transport, utilities, or groceries. Examples: insurance premiums, phone plan, internet, childcare, and subscriptions you treat as required. If a cost is optional and easy to pause, place it under discretionary instead.";
+  }
+
+  if (currentPhase === "accounts" && question.includes("room")) {
+    return "Contribution room is how much you can still add this year without penalty. For TFSA and RRSP, use your CRA values. For FHSA, room follows annual limits. Keep these values accurate because over-contributions can trigger CRA penalties.";
+  }
+
+  if (currentPhase === "debts" && (question.includes("apr") || question.includes("interest"))) {
+    return "APR is the yearly interest rate on the debt. Higher APR debt usually costs more each month, so it is often prioritized. Minimum payment is the required monthly payment to keep the account in good standing.";
+  }
+
+  const byPhase = {
+    profile: "Use this section to set your planning context. Goal, age, province, and first-time homebuyer status shape account order, timelines, and Canadian tax context.",
+    income: "Enter monthly take-home pay after tax. Include steady income you can rely on, and choose stability based on how predictable that income is month to month.",
+    expenses: "Use monthly CAD averages based on recent spending. Keep required recurring costs separate from discretionary spending so cash flow math is realistic.",
+    debts: "If you have debt, add one debt with name, balance, APR, and minimum payment. If you have no debt, select no debt and continue.",
+    accounts: "For TFSA, RRSP, and FHSA, enter whether you have the account, current balance, and CRA contribution room. These values drive account prioritization.",
+    savings: "Emergency fund is liquid cash buffer for shocks. Current monthly savings is what you are already setting aside each month right now.",
+  };
+
+  return byPhase[currentPhase] || "Ask a specific question about any field in this section and I will clarify it.";
+}
+
 export async function POST(request) {
   let currentPhase = "profile";
   let collectedData = {};
@@ -322,16 +362,66 @@ export async function POST(request) {
     messages = Array.isArray(body?.messages) ? body.messages : [];
     currentPhase = body?.currentPhase || "profile";
     collectedData = body?.collectedData && typeof body.collectedData === "object" ? body.collectedData : {};
+    const helperMode = Boolean(body?.helperMode);
 
     if (!Array.isArray(messages)) {
       return NextResponse.json({ error: "messages must be an array" }, { status: 400 });
+    }
+
+    const latestUserText = messages.filter((item) => item.role === "user").at(-1)?.content || "";
+
+    if (helperMode) {
+      if (!process.env.OPENAI_API_KEY) {
+        return NextResponse.json({
+          message: helperFallbackMessage(currentPhase, latestUserText),
+          phase: currentPhase,
+          phaseComplete: false,
+          collectedData,
+        });
+      }
+
+      try {
+        const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        const completion = await client.chat.completions.create({
+          model: "gpt-4o-mini",
+          temperature: 0.2,
+          max_tokens: 220,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a Canadian financial planning intake helper. The user is filling a structured form. Answer only as a helper for field understanding. Never ask for more data entry. Never advance intake phase. Keep answers concise, plain language, and practical.",
+            },
+            {
+              role: "system",
+              content: `Current phase: ${currentPhase}. Context: ${helperPhaseContext(currentPhase)}. Collected data snapshot: ${JSON.stringify(collectedData)}.`,
+            },
+            { role: "user", content: latestUserText },
+          ],
+        });
+
+        const helperMessage = completion.choices?.[0]?.message?.content?.trim() || helperFallbackMessage(currentPhase, latestUserText);
+
+        return NextResponse.json({
+          message: helperMessage,
+          phase: currentPhase,
+          phaseComplete: false,
+          collectedData,
+        });
+      } catch {
+        return NextResponse.json({
+          message: helperFallbackMessage(currentPhase, latestUserText),
+          phase: currentPhase,
+          phaseComplete: false,
+          collectedData,
+        });
+      }
     }
 
     const phaseInstruction = `You are currently in PHASE: ${currentPhase}. Data collected so far: ${JSON.stringify(collectedData)}. Continue collecting required fields for this phase.`;
 
     // Check if OpenAI API key is available or has quota issues
     if (!process.env.OPENAI_API_KEY) {
-      const latestUserText = messages.filter((item) => item.role === "user").at(-1)?.content || "";
       const fallback = nextFallbackStep(currentPhase, collectedData, latestUserText);
       return NextResponse.json(fallback);
     }
@@ -373,7 +463,6 @@ export async function POST(request) {
 
       const rawText = completion.choices?.[0]?.message?.content?.trim() || "";
       const { displayMessage, marker } = parsePhaseMarker(rawText);
-      const latestUserText = messages.filter((item) => item.role === "user").at(-1)?.content || "";
       const deterministic = nextFallbackStep(currentPhase, collectedData, latestUserText);
 
       const responsePhase = marker?.phaseComplete
@@ -396,7 +485,6 @@ export async function POST(request) {
       // Handle OpenAI quota errors gracefully
       if (openaiError.code === 'insufficient_quota' || openaiError.type === 'insufficient_quota') {
         console.log("OpenAI quota exceeded, using fallback mode");
-        const latestUserText = messages.filter((item) => item.role === "user").at(-1)?.content || "";
         const fallback = nextFallbackStep(currentPhase, collectedData, latestUserText);
         return NextResponse.json({
           ...fallback,

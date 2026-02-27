@@ -95,10 +95,33 @@ export default function PlannerPage() {
   });
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const [generationError, setGenerationError] = useState("");
+  const [intakeValidationError, setIntakeValidationError] = useState("");
+  const [profileForm, setProfileForm] = useState({ goal: "", age: "", province: "", firstTimeBuyer: "" });
+  const [incomeForm, setIncomeForm] = useState({ monthlyIncome: "", incomeStability: "" });
+  const [expensesForm, setExpensesForm] = useState({
+    housing: "",
+    transport: "",
+    utilities: "",
+    groceries: "",
+    otherFixed: "",
+    discretionary: "",
+  });
+  const [debtForm, setDebtForm] = useState({ hasDebts: "yes", name: "", balance: "", interestRate: "", minimumPayment: "" });
+  const [accountsForm, setAccountsForm] = useState({
+    tfsaHas: "",
+    tfsaBalance: "",
+    tfsaRoom: "",
+    rrspHas: "",
+    rrspBalance: "",
+    rrspRoom: "",
+    fhsaHas: "",
+    fhsaBalance: "",
+    fhsaRoom: "",
+  });
+  const [savingsForm, setSavingsForm] = useState({ emergencyFundAmount: "", currentMonthlySavings: "" });
   const [reasoningDone, setReasoningDone] = useState(false);
   const chatEndRef = useRef(null);
   const intakeDataRef = useRef({});
-  const previousPhaseRef = useRef("profile");
 
   const currentStep = FLOW[stepIndex];
   const completedPhasesByKey = {
@@ -153,6 +176,162 @@ export default function PlannerPage() {
   const assumptions = effectivePlan?.assumptions || plan.assumptions;
   const weeklyAction = effectivePlan?.oneActionThisWeek || "Pick one transfer amount you can sustain and schedule it this week.";
   const bookRecommendation = effectivePlan?.bookRecommendation || null;
+  const currentPhasePosition = Math.max(0, PHASE_ORDER.indexOf(currentPhase));
+
+  const toNumber = (value) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  const goToNextIntakePhase = () => {
+    const nextPhase = PHASE_ORDER[currentPhasePosition + 1] || "complete";
+    setCurrentPhase(nextPhase);
+  };
+
+  const goToPreviousIntakePhase = () => {
+    const previousPhase = PHASE_ORDER[Math.max(0, currentPhasePosition - 1)] || "profile";
+    setCurrentPhase(previousPhase);
+  };
+
+  const handleStructuredPhaseSubmit = () => {
+    setIntakeValidationError("");
+
+    if (currentPhase === "profile") {
+      const age = toNumber(profileForm.age);
+      if (!profileForm.goal.trim() || !age || age <= 0 || !profileForm.province.trim() || !profileForm.firstTimeBuyer) {
+        setIntakeValidationError("Please complete goal, age, province, and homebuyer status before continuing.");
+        return;
+      }
+
+      setCollectedData((prev) => mergeCollectedData(prev, {
+        profile: {
+          ...(prev.profile || {}),
+          goal: profileForm.goal.trim(),
+          age,
+          province: profileForm.province.trim(),
+          firstTimeBuyer: profileForm.firstTimeBuyer === "yes",
+          planType,
+        },
+      }));
+      goToNextIntakePhase();
+      return;
+    }
+
+    if (currentPhase === "income") {
+      const income = toNumber(incomeForm.monthlyIncome);
+      if (!income || income <= 0 || !incomeForm.incomeStability) {
+        setIntakeValidationError("Please enter monthly income and select income stability.");
+        return;
+      }
+
+      setMonthlyIncome(income);
+      setCollectedData((prev) => mergeCollectedData(prev, {
+        monthlyIncome: income,
+        incomeStability: incomeForm.incomeStability,
+      }));
+      goToNextIntakePhase();
+      return;
+    }
+
+    if (currentPhase === "expenses") {
+      const values = Object.fromEntries(Object.entries(expensesForm).map(([key, value]) => [key, toNumber(value)]));
+      const hasInvalid = Object.values(values).some((value) => value === null || value < 0);
+      if (hasInvalid) {
+        setIntakeValidationError("Please enter valid non-negative CAD amounts for all expense fields.");
+        return;
+      }
+
+      setCollectedData((prev) => mergeCollectedData(prev, { expenses: values }));
+      goToNextIntakePhase();
+      return;
+    }
+
+    if (currentPhase === "debts") {
+      if (debtForm.hasDebts === "no") {
+        setCollectedData((prev) => mergeCollectedData(prev, { debts: [] }));
+        goToNextIntakePhase();
+        return;
+      }
+
+      const balance = toNumber(debtForm.balance);
+      const interestRate = toNumber(debtForm.interestRate);
+      const minimumPayment = toNumber(debtForm.minimumPayment);
+      if (!debtForm.name.trim() || balance === null || interestRate === null || minimumPayment === null || balance < 0 || interestRate < 0 || minimumPayment < 0) {
+        setIntakeValidationError("Add debt name, balance, APR, and minimum payment to continue.");
+        return;
+      }
+
+      setCollectedData((prev) => mergeCollectedData(prev, {
+        debts: [
+          {
+            name: debtForm.name.trim(),
+            balance,
+            interestRate,
+            minimumPayment,
+          },
+        ],
+      }));
+      goToNextIntakePhase();
+      return;
+    }
+
+    if (currentPhase === "accounts") {
+      const accountFields = [
+        accountsForm.tfsaHas,
+        accountsForm.rrspHas,
+        accountsForm.fhsaHas,
+        accountsForm.tfsaBalance,
+        accountsForm.tfsaRoom,
+        accountsForm.rrspBalance,
+        accountsForm.rrspRoom,
+        accountsForm.fhsaBalance,
+        accountsForm.fhsaRoom,
+      ];
+      if (accountFields.some((value) => value === "")) {
+        setIntakeValidationError("Please complete all TFSA, RRSP, and FHSA fields.");
+        return;
+      }
+
+      const parsed = {
+        tfsaBalance: toNumber(accountsForm.tfsaBalance),
+        tfsaRoom: toNumber(accountsForm.tfsaRoom),
+        rrspBalance: toNumber(accountsForm.rrspBalance),
+        rrspRoom: toNumber(accountsForm.rrspRoom),
+        fhsaBalance: toNumber(accountsForm.fhsaBalance),
+        fhsaRoom: toNumber(accountsForm.fhsaRoom),
+      };
+
+      if (Object.values(parsed).some((value) => value === null || value < 0)) {
+        setIntakeValidationError("Use valid non-negative amounts for balances and contribution room.");
+        return;
+      }
+
+      setCollectedData((prev) => mergeCollectedData(prev, {
+        accounts: {
+          tfsa: { hasAccount: accountsForm.tfsaHas === "yes", balance: parsed.tfsaBalance, roomAvailable: parsed.tfsaRoom },
+          rrsp: { hasAccount: accountsForm.rrspHas === "yes", balance: parsed.rrspBalance, roomAvailable: parsed.rrspRoom },
+          fhsa: { hasAccount: accountsForm.fhsaHas === "yes", balance: parsed.fhsaBalance, roomAvailable: parsed.fhsaRoom },
+        },
+      }));
+      goToNextIntakePhase();
+      return;
+    }
+
+    if (currentPhase === "savings") {
+      const emergencyFundAmount = toNumber(savingsForm.emergencyFundAmount);
+      const currentMonthlySavings = toNumber(savingsForm.currentMonthlySavings);
+      if (emergencyFundAmount === null || currentMonthlySavings === null || emergencyFundAmount < 0 || currentMonthlySavings < 0) {
+        setIntakeValidationError("Please enter valid non-negative savings amounts.");
+        return;
+      }
+
+      setCollectedData((prev) => mergeCollectedData(prev, {
+        emergencyFundAmount,
+        currentMonthlySavings,
+      }));
+      setCurrentPhase("complete");
+    }
+  };
 
   const requestPlanGeneration = async () => {
     setIsGeneratingPlan(true);
@@ -203,73 +382,39 @@ export default function PlannerPage() {
     const text = (rawMessage ?? chatInput).trim();
     if (!text || isLoading || currentPhase === "complete") return;
 
-    const userMessage = { role: "user", content: text };
-    const nextMessages = [...messages, userMessage];
-
+    const nextMessages = [...messages, { role: "user", content: text }];
+    setIsLoading(true);
     setMessages(nextMessages);
     setChatInput("");
-    setIsLoading(true);
 
     try {
-      const userMessageCount = nextMessages.filter((item) => item.role === "user").length;
-      const maxAttempts = userMessageCount === 1 ? 2 : 1;
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: nextMessages,
+          currentPhase,
+          collectedData,
+          helperMode: true,
+        }),
+      });
 
-      let data = null;
-      let lastError = null;
+      const payload = await response.json().catch(() => ({}));
+      const helperMessage = payload?.message || "I can help explain any field in this section. Ask a specific question and I will keep it tied to your current form.";
 
-      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-        try {
-          const response = await fetch("/api/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              messages: nextMessages,
-              currentPhase,
-              collectedData: intakeDataRef.current,
-            }),
-          });
-
-          if (!response.ok) {
-            throw new Error("Chat request failed");
-          }
-
-          data = await response.json();
-          break;
-        } catch (error) {
-          lastError = error;
-          if (attempt < maxAttempts) {
-            await new Promise((resolve) => setTimeout(resolve, 300));
-          }
-        }
-      }
-
-      if (!data) {
-        throw lastError || new Error("Chat request failed");
-      }
-
-      if (typeof data.message === "string" && data.message.trim()) {
-        setMessages((prev) => [...prev, { role: "assistant", content: data.message }]);
-      }
-
-      if (data.collectedData) {
-        setCollectedData((prev) => mergeCollectedData(prev, data.collectedData));
-      }
-
-      if (data.phase) {
-        const normalizedPhase = String(data.phase).toLowerCase();
-        if (PHASE_ORDER.includes(normalizedPhase)) {
-          setCurrentPhase(normalizedPhase);
-        }
-      } else if (data.phaseComplete) {
-        const currentIndex = PHASE_ORDER.indexOf(currentPhase);
-        setCurrentPhase(PHASE_ORDER[currentIndex + 1] || "complete");
-      }
-    } catch (error) {
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "I ran into a connection issue. Please try again so we can keep your intake moving.",
+          content: helperMessage,
+        },
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "I hit a temporary issue. Ask again and I will explain the current section fields in plain language.",
         },
       ]);
     } finally {
@@ -316,17 +461,6 @@ export default function PlannerPage() {
   }, [currentStep, intakeComplete, intakeStarted]);
 
   useEffect(() => {
-    if (currentStep !== "intake" || messages.length > 0) return;
-    const intro = PHASE_META[currentPhase]?.prompt || PHASE_META.profile.prompt;
-    setMessages([
-      {
-        role: "assistant",
-        content: `Hi, I'm your AI financial planner. ${intro}`,
-      },
-    ]);
-  }, [currentStep, currentPhase, messages.length]);
-
-  useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
@@ -335,23 +469,6 @@ export default function PlannerPage() {
   useEffect(() => {
     intakeDataRef.current = collectedData;
   }, [collectedData]);
-
-  useEffect(() => {
-    if (currentStep !== "intake" || isLoading || currentPhase === "complete") return;
-
-    const prevPhase = previousPhaseRef.current;
-    if (currentPhase !== prevPhase) {
-      const lastMessage = messages[messages.length - 1];
-      if (!lastMessage || lastMessage.role !== "assistant") {
-        const prompt = PHASE_META[currentPhase]?.prompt;
-        if (prompt) {
-          setMessages((prev) => [...prev, { role: "assistant", content: prompt }]);
-        }
-      }
-    }
-
-    previousPhaseRef.current = currentPhase;
-  }, [currentPhase, currentStep, isLoading, messages]);
 
   useEffect(() => {
     if (currentStep === "intake" && currentPhase === "complete") {
@@ -803,8 +920,112 @@ export default function PlannerPage() {
                   </div>
                 </div>
 
-                {/* Chat messages */}
+                {/* Intake content */}
                 <div className="flex-1 min-h-0 overflow-y-auto py-5 space-y-5">
+                  <section className="bg-white border border-slate-100 rounded-2xl p-4 space-y-4">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-widest font-semibold text-slate-400">{PHASE_META[currentPhase]?.label || "Intake"}</p>
+                      <h3 className="text-base font-semibold mt-1">Enter this section in one pass</h3>
+                    </div>
+
+                    {currentPhase === "profile" && (
+                      <div className="space-y-3">
+                        <input value={profileForm.goal} onChange={(e) => setProfileForm((prev) => ({ ...prev, goal: e.target.value }))} placeholder="Main financial goal" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                        <input value={profileForm.age} onChange={(e) => setProfileForm((prev) => ({ ...prev, age: e.target.value }))} placeholder="Age" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                        <input value={profileForm.province} onChange={(e) => setProfileForm((prev) => ({ ...prev, province: e.target.value }))} placeholder="Province (e.g., Ontario)" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                        <div className="grid grid-cols-2 gap-2">
+                          <button type="button" onClick={() => setProfileForm((prev) => ({ ...prev, firstTimeBuyer: "yes" }))} className={`rounded-xl border px-3 py-2 text-sm ${profileForm.firstTimeBuyer === "yes" ? "border-primary text-primary" : "border-slate-200 text-slate-600"}`}>First-time buyer: Yes</button>
+                          <button type="button" onClick={() => setProfileForm((prev) => ({ ...prev, firstTimeBuyer: "no" }))} className={`rounded-xl border px-3 py-2 text-sm ${profileForm.firstTimeBuyer === "no" ? "border-primary text-primary" : "border-slate-200 text-slate-600"}`}>First-time buyer: No</button>
+                        </div>
+                      </div>
+                    )}
+
+                    {currentPhase === "income" && (
+                      <div className="space-y-3">
+                        <input value={incomeForm.monthlyIncome} onChange={(e) => setIncomeForm((prev) => ({ ...prev, monthlyIncome: e.target.value }))} placeholder="Monthly take-home income (CAD)" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                        <select value={incomeForm.incomeStability} onChange={(e) => setIncomeForm((prev) => ({ ...prev, incomeStability: e.target.value }))} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white">
+                          <option value="">Income stability</option>
+                          <option value="stable">Stable</option>
+                          <option value="variable">Variable</option>
+                          <option value="at-risk">At risk</option>
+                        </select>
+                      </div>
+                    )}
+
+                    {currentPhase === "expenses" && (
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          ["housing", "Housing"],
+                          ["transport", "Transport"],
+                          ["utilities", "Utilities"],
+                          ["groceries", "Groceries"],
+                          ["otherFixed", "Other fixed"],
+                          ["discretionary", "Discretionary"],
+                        ].map(([key, label]) => (
+                          <input
+                            key={key}
+                            value={expensesForm[key]}
+                            onChange={(e) => setExpensesForm((prev) => ({ ...prev, [key]: e.target.value }))}
+                            placeholder={`${label} (CAD)`}
+                            type="number"
+                            className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {currentPhase === "debts" && (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-2">
+                          <button type="button" onClick={() => setDebtForm((prev) => ({ ...prev, hasDebts: "yes" }))} className={`rounded-xl border px-3 py-2 text-sm ${debtForm.hasDebts === "yes" ? "border-primary text-primary" : "border-slate-200 text-slate-600"}`}>I have debt</button>
+                          <button type="button" onClick={() => setDebtForm((prev) => ({ ...prev, hasDebts: "no" }))} className={`rounded-xl border px-3 py-2 text-sm ${debtForm.hasDebts === "no" ? "border-primary text-primary" : "border-slate-200 text-slate-600"}`}>No debt</button>
+                        </div>
+                        {debtForm.hasDebts === "yes" && (
+                          <div className="grid grid-cols-2 gap-2">
+                            <input value={debtForm.name} onChange={(e) => setDebtForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="Debt name" className="col-span-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                            <input value={debtForm.balance} onChange={(e) => setDebtForm((prev) => ({ ...prev, balance: e.target.value }))} placeholder="Balance" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                            <input value={debtForm.interestRate} onChange={(e) => setDebtForm((prev) => ({ ...prev, interestRate: e.target.value }))} placeholder="APR %" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                            <input value={debtForm.minimumPayment} onChange={(e) => setDebtForm((prev) => ({ ...prev, minimumPayment: e.target.value }))} placeholder="Minimum payment" type="number" className="col-span-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {currentPhase === "accounts" && (
+                      <div className="space-y-3">
+                        {[
+                          ["TFSA", "tfsa"],
+                          ["RRSP", "rrsp"],
+                          ["FHSA", "fhsa"],
+                        ].map(([label, key]) => (
+                          <div key={key} className="border border-slate-100 rounded-xl p-3 space-y-2">
+                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{label}</p>
+                            <div className="grid grid-cols-3 gap-2">
+                              <select value={accountsForm[`${key}Has`]} onChange={(e) => setAccountsForm((prev) => ({ ...prev, [`${key}Has`]: e.target.value }))} className="rounded-xl border border-slate-200 px-2 py-2 text-sm bg-white">
+                                <option value="">Has account?</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                              </select>
+                              <input value={accountsForm[`${key}Balance`]} onChange={(e) => setAccountsForm((prev) => ({ ...prev, [`${key}Balance`]: e.target.value }))} placeholder="Balance" type="number" className="rounded-xl border border-slate-200 px-2 py-2 text-sm" />
+                              <input value={accountsForm[`${key}Room`]} onChange={(e) => setAccountsForm((prev) => ({ ...prev, [`${key}Room`]: e.target.value }))} placeholder="Room" type="number" className="rounded-xl border border-slate-200 px-2 py-2 text-sm" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {currentPhase === "savings" && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <input value={savingsForm.emergencyFundAmount} onChange={(e) => setSavingsForm((prev) => ({ ...prev, emergencyFundAmount: e.target.value }))} placeholder="Emergency fund" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                        <input value={savingsForm.currentMonthlySavings} onChange={(e) => setSavingsForm((prev) => ({ ...prev, currentMonthlySavings: e.target.value }))} placeholder="Monthly savings" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                      </div>
+                    )}
+
+                    {intakeValidationError && (
+                      <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">{intakeValidationError}</p>
+                    )}
+                  </section>
+
                   {/* KB tip — accounts phase */}
                   {currentPhase === "accounts" && (
                     <div className="mt-1 mb-3 px-1 py-3 rounded-xl border border-amber-100 bg-amber-50 flex flex-col gap-1.5">
@@ -859,46 +1080,46 @@ export default function PlannerPage() {
 
                 {/* Input footer */}
                 <div className="shrink-0 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-slate-100 bg-background-light">
-                  <form
-                    className="relative group"
-                    onSubmit={(event) => {
-                      event.preventDefault();
-                      handleChatSubmit();
-                    }}
-                  >
+                  <p className="text-xs text-slate-500 mb-2 px-1">Ask about any field in this section</p>
+                  <form className="relative group" onSubmit={(event) => {
+                    event.preventDefault();
+                    handleChatSubmit();
+                  }}>
                     <input
                       type="text"
                       value={chatInput}
                       onChange={(event) => setChatInput(event.target.value)}
-                      className="w-full bg-white border-2 border-slate-100 focus:border-primary focus:ring-0 rounded-2xl py-5 pl-5 pr-16 text-base font-medium placeholder:text-slate-300 transition-all shadow-sm"
-                      placeholder="Type your answer..."
+                      className="w-full bg-white border border-slate-200 focus:border-primary focus:ring-0 rounded-2xl py-3.5 pl-4 pr-14 text-sm placeholder:text-slate-300 transition-all"
+                      placeholder="Need help with this section? Ask here"
                       disabled={isLoading || currentPhase === "complete"}
                     />
                     <button
                       type="submit"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-transform"
                       style={{ color: "white" }}
                       disabled={isLoading || currentPhase === "complete"}
                     >
-                      <span className="material-symbols-outlined text-xl">arrow_upward</span>
+                      <span className="material-symbols-outlined text-lg">help</span>
                     </button>
                   </form>
-                  <div className="mt-4 flex justify-between items-center px-2">
+                  <div className="mt-3 flex justify-between items-center px-1">
                     <p className="text-xs text-slate-400">Values are in CAD</p>
-                    <div className="flex gap-4">
+                    <div className="flex gap-2">
                       <button
-                        className="text-xs font-semibold text-slate-500 hover:text-primary transition-colors"
-                        onClick={() => handleChatSubmit("Skip this for now")}
-                        disabled={isLoading || currentPhase === "complete"}
+                        className="text-xs font-semibold text-slate-500 hover:text-primary transition-colors px-2 py-1"
+                        onClick={goToPreviousIntakePhase}
+                        disabled={currentPhase === "profile" || isLoading}
+                        type="button"
                       >
-                        Skip
+                        Back
                       </button>
                       <button
-                        className="text-xs font-semibold text-slate-500 hover:text-primary transition-colors"
-                        onClick={() => handleChatSubmit("I'm not sure")}
+                        className="text-xs font-semibold text-white bg-slate-900 rounded-lg px-3 py-1.5 disabled:opacity-40"
+                        onClick={handleStructuredPhaseSubmit}
                         disabled={isLoading || currentPhase === "complete"}
+                        type="button"
                       >
-                        I&apos;m not sure
+                        {currentPhase === "savings" ? "Finish intake" : "Save and continue"}
                       </button>
                     </div>
                   </div>
