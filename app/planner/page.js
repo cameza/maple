@@ -93,6 +93,11 @@ export default function PlannerPage() {
     if (typeof window === 'undefined') return null;
     try { return JSON.parse(localStorage.getItem('mapleplan_planData') || 'null'); } catch { return null; }
   });
+  const [planRecordId, setPlanRecordId] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("mapleplan_planId") || "";
+  });
+  const [clientId, setClientId] = useState("");
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const [generationError, setGenerationError] = useState("");
   const [intakeValidationError, setIntakeValidationError] = useState("");
@@ -365,6 +370,29 @@ export default function PlannerPage() {
       const generatedPlan = await response.json();
       setPlanData(generatedPlan);
       try { localStorage.setItem('mapleplan_planData', JSON.stringify(generatedPlan)); } catch {}
+
+      try {
+        const saveRes = await fetch("/api/plan/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientId,
+            intakeData: payload,
+            planData: generatedPlan,
+          }),
+        });
+        if (saveRes.ok) {
+          const saved = await saveRes.json();
+          const id = saved?.id || "";
+          if (id) {
+            setPlanRecordId(id);
+            try { localStorage.setItem("mapleplan_planId", id); } catch {}
+          }
+        }
+      } catch {
+        // Non-blocking persistence fallback. Local storage remains source of truth in prototype mode.
+      }
+
       setGenerationError("");
     } catch (error) {
       if (error?.name === "AbortError") {
@@ -452,6 +480,43 @@ export default function PlannerPage() {
     if (generationError && !planData) return;
     setStepIndex(FLOW.indexOf("plan"));
   }, [currentStep, generationError, isGeneratingPlan, planData, reasoningDone]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let localId = localStorage.getItem("mapleplan_client_id") || "";
+    if (!localId) {
+      localId = typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `mp-${Date.now()}`;
+      localStorage.setItem("mapleplan_client_id", localId);
+    }
+    setClientId(localId);
+  }, []);
+
+  useEffect(() => {
+    if (currentStep !== "plan") return;
+    if (planData || !planRecordId) return;
+
+    let cancelled = false;
+    const loadSavedPlan = async () => {
+      try {
+        const response = await fetch(`/api/plan/${planRecordId}`);
+        if (!response.ok) return;
+        const saved = await response.json();
+        if (!cancelled && saved?.planData) {
+          setPlanData(saved.planData);
+          try { localStorage.setItem("mapleplan_planData", JSON.stringify(saved.planData)); } catch {}
+        }
+      } catch {
+        // Local storage fallback already exists.
+      }
+    };
+
+    loadSavedPlan();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentStep, planData, planRecordId]);
 
   useEffect(() => {
     if (!intakeStarted) return;
@@ -710,9 +775,13 @@ export default function PlannerPage() {
                 <span className="material-symbols-outlined text-2xl">arrow_back_ios</span>
               </button>
               <h1 className="text-xl font-semibold tracking-tight">Your Plan</h1>
-              <button className="p-2 -mr-2">
-                <span className="material-symbols-outlined text-2xl">more_horiz</span>
-              </button>
+              <Link
+                href={planRecordId ? `/planner/plan?id=${planRecordId}` : "/planner/plan"}
+                className="p-2 -mr-2"
+                aria-label="Open saved plan page"
+              >
+                <span className="material-symbols-outlined text-2xl">open_in_new</span>
+              </Link>
             </header>
           ) : (
             <header className="sticky top-0 z-50 bg-background-light/80 backdrop-blur-md border-b border-slate-100 px-4 py-3 flex items-center justify-between">
