@@ -36,7 +36,7 @@ function buildUiPlanShape(profile, metrics, agentPlan) {
   const milestones = Array.isArray(agentPlan?.milestones)
     ? agentPlan.milestones.map((item, index) => ({
       label: item?.title || `Milestone ${index + 1}`,
-      projectedDate: timelineToMonthLabel(item?.estimatedTimeline, index + 1),
+      projectedDate: item?.estimatedCompletionDate || timelineToMonthLabel(item?.estimatedTimeline, index + 1),
       celebrationMessage: item?.unlocksWhen || item?.whyThisOrder || "Progress unlocked.",
     }))
     : [];
@@ -48,6 +48,8 @@ function buildUiPlanShape(profile, metrics, agentPlan) {
       action: item?.title || `Priority ${index + 1}`,
       reasoning: item?.whyThisOrder || "This is sequenced to protect your financial stability first.",
       dollarAmount: Math.max(0, asNumber(item?.monthlyContribution)),
+      duration: item?.estimatedTimeline || "Ongoing",
+      completionDate: item?.estimatedCompletionDate || "To be calculated",
     }));
 
   return {
@@ -88,7 +90,7 @@ function buildUiPlanShape(profile, metrics, agentPlan) {
       projectedPayoffDate: metrics.debtFreeDateLabel || "N/A",
       totalInterestSaved: 0,
     })),
-    debtFreeDate: agentPlan?.debtFreeDate || metrics.debtFreeDateLabel,
+    debtFreeDate: metrics.debtFreeDateLabel,
     registeredAccounts: ["TFSA", "RRSP", "FHSA"].map((type) => {
       const key = type.toLowerCase();
       return {
@@ -116,6 +118,7 @@ function buildUiPlanShape(profile, metrics, agentPlan) {
     },
     milestones,
     priorities,
+    coachOpening: agentPlan?.coachOpening || "Here's your personalized plan based on your current financial situation.",
     bookRecommendation: {
       title: agentPlan?.bookRecommendation?.title || "The Psychology of Money",
       author: agentPlan?.bookRecommendation?.author || "Morgan Housel",

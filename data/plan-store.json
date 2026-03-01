@@ -1,6 +1,1492 @@
 {
   "plans": [
     {
+      "id": "cfe647df-bf7f-4f5a-aab7-12754098ec6f",
+      "clientId": "9c11c406-36b4-42a1-9635-4b95c1ae7edb",
+      "createdAt": "2026-03-01T16:17:48.743Z",
+      "intakeData": {
+        "profile": {
+          "planType": "individual",
+          "goal": "Buy a home in 3-4 years",
+          "age": 31,
+          "province": "Ontario",
+          "firstTimeBuyer": true
+        },
+        "expenses": {
+          "housing": 1650,
+          "transport": 150,
+          "utilities": 120,
+          "groceries": 400,
+          "otherFixed": 200,
+          "discretionary": 300
+        },
+        "accounts": {
+          "tfsa": {
+            "hasAccount": true,
+            "balance": 8500,
+            "roomAvailable": 7000
+          },
+          "rrsp": {
+            "hasAccount": true,
+            "balance": 3200,
+            "roomAvailable": 15000
+          },
+          "fhsa": {
+            "hasAccount": false,
+            "balance": 0,
+            "roomAvailable": 40000
+          }
+        },
+        "monthlyIncome": 5200,
+        "incomeStability": "stable",
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19,
+            "minimumPayment": 120
+          }
+        ],
+        "emergencyFundAmount": 500,
+        "currentMonthlySavings": 380
+      },
+      "planData": {
+        "financialLevel": {
+          "current": 1,
+          "label": "Foundation",
+          "nextMilestone": "Pay Off High-Interest Credit Card Debt"
+        },
+        "snapshot": {
+          "monthlyIncome": 5200,
+          "totalDebt": 4800,
+          "fixedCosts": 2640,
+          "discretionary": 2560,
+          "emergencyFundMonths": 0.2
+        },
+        "buckets": {
+          "current": {
+            "fixed": 2520,
+            "savings": 520,
+            "investments": 0,
+            "guiltFree": 2160
+          },
+          "target": {
+            "fixed": 55,
+            "investments": 10,
+            "savings": 10,
+            "guiltFree": 25
+          }
+        },
+        "emergencyFund": {
+          "currentMonths": 0.2,
+          "targetMonths": 3,
+          "monthlyToContribute": 520,
+          "projectedCompleteDate": "May 2027",
+          "accountRecommendation": "Use a high-interest savings account and verify CRA contribution room before registered contributions."
+        },
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19,
+            "minimumPayment": 120,
+            "recommendedPayment": 896,
+            "projectedPayoffDate": "September 2026",
+            "totalInterestSaved": 0
+          }
+        ],
+        "debtFreeDate": "March 2024",
+        "registeredAccounts": [
+          {
+            "type": "TFSA",
+            "balance": 8500,
+            "roomAvailable": 7000,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "RRSP",
+            "balance": 3200,
+            "roomAvailable": 15000,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "FHSA",
+            "balance": 0,
+            "roomAvailable": 40000,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          }
+        ],
+        "opportunityCost": {
+          "unusedRoomTotal": 7000,
+          "foregoingGrowth10yr": 4402,
+          "plainLanguage": "Delaying debt payoff increases interest costs and reduces available funds for home savings."
+        },
+        "monthlyAllocation": {
+          "emergencyFund": 520,
+          "debtPayoff": 896,
+          "fhsa": 0,
+          "rrsp": 0,
+          "tfsa": 0,
+          "guiltFree": 2160
+        },
+        "milestones": [
+          {
+            "label": "Build 1-Month Emergency Fund",
+            "projectedDate": "August 2026",
+            "celebrationMessage": "Emergency fund reaches $2520."
+          },
+          {
+            "label": "Pay Off High-Interest Credit Card Debt",
+            "projectedDate": "June 2026",
+            "celebrationMessage": "Credit card balance is $0."
+          },
+          {
+            "label": "Build 3-Month Emergency Fund",
+            "projectedDate": "January 2027",
+            "celebrationMessage": "Emergency fund reaches $7560."
+          },
+          {
+            "label": "Contribute to FHSA",
+            "projectedDate": "July 2027",
+            "celebrationMessage": "First $8000 FHSA contribution is made."
+          }
+        ],
+        "priorities": [
+          {
+            "rank": 1,
+            "action": "Build 1-Month Emergency Fund",
+            "reasoning": "An emergency fund is crucial to prevent unexpected expenses from derailing your financial plan.",
+            "dollarAmount": 500
+          },
+          {
+            "rank": 2,
+            "action": "Pay Off High-Interest Credit Card Debt",
+            "reasoning": "Eliminating high-interest debt frees up cash flow and reduces financial stress.",
+            "dollarAmount": 2060
+          },
+          {
+            "rank": 3,
+            "action": "Build 3-Month Emergency Fund",
+            "reasoning": "A larger emergency fund provides greater security and allows for more aggressive investing.",
+            "dollarAmount": 500
+          }
+        ],
+        "bookRecommendation": {
+          "title": "The Psychology of Money",
+          "author": "Morgan Housel",
+          "hook": "Understanding the behavioral aspects of money can help you stay motivated and consistent."
+        },
+        "oneActionThisWeek": "Set up an automatic transfer of $500 to a high-interest savings account.",
+        "assumptions": [
+          "Monthly surplus remains stable at $2560.",
+          "No new high-interest debt is incurred.",
+          "Emergency fund contributions are prioritized until 1-month target is met."
+        ]
+      }
+    },
+    {
+      "id": "9a096e87-0072-4d82-9c48-ef14525e9d5a",
+      "clientId": "9c11c406-36b4-42a1-9635-4b95c1ae7edb",
+      "createdAt": "2026-03-01T16:14:35.043Z",
+      "intakeData": {
+        "profile": {
+          "planType": "individual",
+          "goal": "Buy a home in 3-4 years",
+          "age": 31,
+          "province": "Ontario",
+          "firstTimeBuyer": true
+        },
+        "expenses": {
+          "housing": 1650,
+          "transport": 150,
+          "utilities": 120,
+          "groceries": 400,
+          "otherFixed": 200,
+          "discretionary": 300
+        },
+        "accounts": {
+          "tfsa": {
+            "hasAccount": true,
+            "balance": 8500,
+            "roomAvailable": 7000
+          },
+          "rrsp": {
+            "hasAccount": true,
+            "balance": 3200,
+            "roomAvailable": 15000
+          },
+          "fhsa": {
+            "hasAccount": false,
+            "balance": 0,
+            "roomAvailable": 40000
+          }
+        },
+        "monthlyIncome": 5200,
+        "incomeStability": "stable",
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19,
+            "minimumPayment": 120
+          }
+        ],
+        "emergencyFundAmount": 500,
+        "currentMonthlySavings": 380
+      },
+      "planData": {
+        "financialLevel": {
+          "current": 1,
+          "label": "Foundation",
+          "nextMilestone": "Pay Off Credit Card Debt"
+        },
+        "snapshot": {
+          "monthlyIncome": 5200,
+          "totalDebt": 4800,
+          "fixedCosts": 2640,
+          "discretionary": 2560,
+          "emergencyFundMonths": 0.2
+        },
+        "buckets": {
+          "current": {
+            "fixed": 2520,
+            "savings": 520,
+            "investments": 0,
+            "guiltFree": 2160
+          },
+          "target": {
+            "fixed": 55,
+            "investments": 10,
+            "savings": 10,
+            "guiltFree": 25
+          }
+        },
+        "emergencyFund": {
+          "currentMonths": 0.2,
+          "targetMonths": 3,
+          "monthlyToContribute": 520,
+          "projectedCompleteDate": "May 2027",
+          "accountRecommendation": "Use a high-interest savings account and verify CRA contribution room before registered contributions."
+        },
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19,
+            "minimumPayment": 120,
+            "recommendedPayment": 896,
+            "projectedPayoffDate": "September 2026",
+            "totalInterestSaved": 0
+          }
+        ],
+        "debtFreeDate": "April 2024",
+        "registeredAccounts": [
+          {
+            "type": "TFSA",
+            "balance": 8500,
+            "roomAvailable": 7000,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "RRSP",
+            "balance": 3200,
+            "roomAvailable": 15000,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "FHSA",
+            "balance": 0,
+            "roomAvailable": 40000,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          }
+        ],
+        "opportunityCost": {
+          "unusedRoomTotal": 7000,
+          "foregoingGrowth10yr": 4402,
+          "plainLanguage": "Delaying debt repayment increases interest costs, reducing funds available for future home savings."
+        },
+        "monthlyAllocation": {
+          "emergencyFund": 520,
+          "debtPayoff": 896,
+          "fhsa": 0,
+          "rrsp": 0,
+          "tfsa": 0,
+          "guiltFree": 2160
+        },
+        "milestones": [
+          {
+            "label": "Build 1-Month Emergency Fund",
+            "projectedDate": "August 2026",
+            "celebrationMessage": "Emergency fund reaches $2520."
+          },
+          {
+            "label": "Pay Off Credit Card Debt",
+            "projectedDate": "June 2026",
+            "celebrationMessage": "Credit card balance is zero."
+          },
+          {
+            "label": "Build 3-Month Emergency Fund",
+            "projectedDate": "August 2026",
+            "celebrationMessage": "Emergency fund reaches $7560."
+          },
+          {
+            "label": "Contribute to FHSA",
+            "projectedDate": "March 2027",
+            "celebrationMessage": "Emergency fund and debt milestones are complete."
+          }
+        ],
+        "priorities": [
+          {
+            "rank": 1,
+            "action": "Build 1-Month Emergency Fund",
+            "reasoning": "An emergency fund prevents financial setbacks from unexpected expenses and is crucial before tackling debt.",
+            "dollarAmount": 500
+          },
+          {
+            "rank": 2,
+            "action": "Pay Off Credit Card Debt",
+            "reasoning": "Eliminating high-interest debt frees up cash flow and reduces financial stress.",
+            "dollarAmount": 2060
+          },
+          {
+            "rank": 3,
+            "action": "Build 3-Month Emergency Fund",
+            "reasoning": "A larger emergency fund provides greater financial security and stability.",
+            "dollarAmount": 1000
+          }
+        ],
+        "bookRecommendation": {
+          "title": "The Psychology of Money",
+          "author": "Morgan Housel",
+          "hook": "This book will help you understand how behavior and consistency are key to financial success, which is crucial as you work through these milestones."
+        },
+        "oneActionThisWeek": "Set up an automatic transfer of $500 to a high-interest savings account.",
+        "assumptions": [
+          "Monthly income and expenses remain stable.",
+          "No new high-interest debt is incurred.",
+          "Surplus is consistently applied to milestones."
+        ]
+      }
+    },
+    {
+      "id": "958e6856-6d3a-4caf-928e-1ce6b193ca1f",
+      "clientId": "9c11c406-36b4-42a1-9635-4b95c1ae7edb",
+      "createdAt": "2026-03-01T15:53:20.524Z",
+      "intakeData": {
+        "profile": {
+          "planType": "individual",
+          "goal": "Stated goal Buy a home in 3-4 years",
+          "age": 31,
+          "province": "Ontario",
+          "firstTimeBuyer": true
+        },
+        "expenses": {
+          "housing": 1900,
+          "transport": 160,
+          "utilities": 180,
+          "groceries": 600,
+          "otherFixed": 260,
+          "discretionary": 500
+        },
+        "accounts": {
+          "tfsa": {
+            "hasAccount": true,
+            "balance": 6200,
+            "roomAvailable": 18500
+          },
+          "rrsp": {
+            "hasAccount": true,
+            "balance": 0,
+            "roomAvailable": 22000
+          },
+          "fhsa": {
+            "hasAccount": false,
+            "balance": 0,
+            "roomAvailable": 0
+          }
+        },
+        "monthlyIncome": 5200,
+        "incomeStability": "stable",
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19.99,
+            "minimumPayment": 150
+          }
+        ],
+        "emergencyFundAmount": 1400,
+        "currentMonthlySavings": 300
+      },
+      "planData": {
+        "financialLevel": {
+          "current": 1,
+          "label": "Foundation",
+          "nextMilestone": "Pay Off Credit Card Debt"
+        },
+        "snapshot": {
+          "monthlyIncome": 5200,
+          "totalDebt": 4800,
+          "fixedCosts": 3250,
+          "discretionary": 1950,
+          "emergencyFundMonths": 0.45
+        },
+        "buckets": {
+          "current": {
+            "fixed": 3100,
+            "savings": 850,
+            "investments": 0,
+            "guiltFree": 1250
+          },
+          "target": {
+            "fixed": 55,
+            "investments": 10,
+            "savings": 10,
+            "guiltFree": 25
+          }
+        },
+        "emergencyFund": {
+          "currentMonths": 0.45,
+          "targetMonths": 3,
+          "monthlyToContribute": 850,
+          "projectedCompleteDate": "January 2027",
+          "accountRecommendation": "Use a high-interest savings account and verify CRA contribution room before registered contributions."
+        },
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19.99,
+            "minimumPayment": 150,
+            "recommendedPayment": 683,
+            "projectedPayoffDate": "October 2026",
+            "totalInterestSaved": 0
+          }
+        ],
+        "debtFreeDate": "June 2024",
+        "registeredAccounts": [
+          {
+            "type": "TFSA",
+            "balance": 6200,
+            "roomAvailable": 18500,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "RRSP",
+            "balance": 0,
+            "roomAvailable": 22000,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "FHSA",
+            "balance": 0,
+            "roomAvailable": 0,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          }
+        ],
+        "opportunityCost": {
+          "unusedRoomTotal": 18500,
+          "foregoingGrowth10yr": 11635,
+          "plainLanguage": "Delaying debt payoff increases interest costs, reducing funds available for future investments."
+        },
+        "monthlyAllocation": {
+          "emergencyFund": 850,
+          "debtPayoff": 683,
+          "fhsa": 0,
+          "rrsp": 0,
+          "tfsa": 0,
+          "guiltFree": 1250
+        },
+        "milestones": [
+          {
+            "label": "Build 1-Month Emergency Fund",
+            "projectedDate": "May 2026",
+            "celebrationMessage": "You have $3100 saved for emergencies."
+          },
+          {
+            "label": "Pay Off Credit Card Debt",
+            "projectedDate": "July 2026",
+            "celebrationMessage": "Credit card balance is $0."
+          },
+          {
+            "label": "Build 3-Month Emergency Fund",
+            "projectedDate": "September 2026",
+            "celebrationMessage": "You have $9300 saved for emergencies."
+          },
+          {
+            "label": "Open and Contribute to TFSA",
+            "projectedDate": "July 2026",
+            "celebrationMessage": "Consistent contributions begin."
+          }
+        ],
+        "priorities": [
+          {
+            "rank": 1,
+            "action": "Build 1-Month Emergency Fund",
+            "reasoning": "An emergency fund prevents unexpected expenses from derailing your financial plan.",
+            "dollarAmount": 850
+          },
+          {
+            "rank": 2,
+            "action": "Pay Off Credit Card Debt",
+            "reasoning": "High-interest debt is a financial drag, costing more in the long run.",
+            "dollarAmount": 1100
+          },
+          {
+            "rank": 3,
+            "action": "Build 3-Month Emergency Fund",
+            "reasoning": "A larger emergency fund ensures stability and peace of mind.",
+            "dollarAmount": 950
+          }
+        ],
+        "bookRecommendation": {
+          "title": "The Psychology of Money",
+          "author": "Morgan Housel",
+          "hook": "To understand how behavior impacts financial success and to build better money habits."
+        },
+        "oneActionThisWeek": "Set up an automatic transfer of $850 to your savings account.",
+        "assumptions": [
+          "Monthly surplus remains stable at $1950.",
+          "No new high-interest debt is incurred.",
+          "Emergency fund contributions are prioritized over investments."
+        ]
+      }
+    },
+    {
+      "id": "00159289-6d40-4122-b045-ce0dd01872a4",
+      "clientId": "9c11c406-36b4-42a1-9635-4b95c1ae7edb",
+      "createdAt": "2026-03-01T15:50:20.231Z",
+      "intakeData": {
+        "profile": {
+          "planType": "individual",
+          "goal": "Stated goal Buy a home in 3-4 years",
+          "age": 31,
+          "province": "Ontario",
+          "firstTimeBuyer": true
+        },
+        "expenses": {
+          "housing": 1900,
+          "transport": 160,
+          "utilities": 180,
+          "groceries": 600,
+          "otherFixed": 260,
+          "discretionary": 500
+        },
+        "accounts": {
+          "tfsa": {
+            "hasAccount": true,
+            "balance": 6200,
+            "roomAvailable": 18500
+          },
+          "rrsp": {
+            "hasAccount": true,
+            "balance": 0,
+            "roomAvailable": 22000
+          },
+          "fhsa": {
+            "hasAccount": false,
+            "balance": 0,
+            "roomAvailable": 0
+          }
+        },
+        "monthlyIncome": 5200,
+        "incomeStability": "stable",
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19.99,
+            "minimumPayment": 150
+          }
+        ],
+        "emergencyFundAmount": 1400,
+        "currentMonthlySavings": 300
+      },
+      "planData": {
+        "financialLevel": {
+          "current": 1,
+          "label": "Foundation",
+          "nextMilestone": "Pay Off Credit Card Debt"
+        },
+        "snapshot": {
+          "monthlyIncome": 5200,
+          "totalDebt": 4800,
+          "fixedCosts": 3250,
+          "discretionary": 1950,
+          "emergencyFundMonths": 0.45
+        },
+        "buckets": {
+          "current": {
+            "fixed": 3100,
+            "savings": 850,
+            "investments": 0,
+            "guiltFree": 1250
+          },
+          "target": {
+            "fixed": 55,
+            "investments": 10,
+            "savings": 10,
+            "guiltFree": 25
+          }
+        },
+        "emergencyFund": {
+          "currentMonths": 0.45,
+          "targetMonths": 3,
+          "monthlyToContribute": 850,
+          "projectedCompleteDate": "January 2027",
+          "accountRecommendation": "Use a high-interest savings account and verify CRA contribution room before registered contributions."
+        },
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19.99,
+            "minimumPayment": 150,
+            "recommendedPayment": 683,
+            "projectedPayoffDate": "October 2026",
+            "totalInterestSaved": 0
+          }
+        ],
+        "debtFreeDate": "April 2024",
+        "registeredAccounts": [
+          {
+            "type": "TFSA",
+            "balance": 6200,
+            "roomAvailable": 18500,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "RRSP",
+            "balance": 0,
+            "roomAvailable": 22000,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "FHSA",
+            "balance": 0,
+            "roomAvailable": 0,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          }
+        ],
+        "opportunityCost": {
+          "unusedRoomTotal": 18500,
+          "foregoingGrowth10yr": 11635,
+          "plainLanguage": "By focusing on debt repayment and building your emergency fund first, you'll avoid high interest costs and create a stable base for future investments."
+        },
+        "monthlyAllocation": {
+          "emergencyFund": 850,
+          "debtPayoff": 683,
+          "fhsa": 0,
+          "rrsp": 0,
+          "tfsa": 0,
+          "guiltFree": 1250
+        },
+        "milestones": [
+          {
+            "label": "Build Emergency Fund to 1 Month",
+            "projectedDate": "May 2026",
+            "celebrationMessage": "Emergency fund reaches $3100."
+          },
+          {
+            "label": "Pay Off Credit Card Debt",
+            "projectedDate": "July 2026",
+            "celebrationMessage": "Credit card balance is zero."
+          },
+          {
+            "label": "Build Emergency Fund to 3 Months",
+            "projectedDate": "September 2026",
+            "celebrationMessage": "Emergency fund reaches $9300."
+          }
+        ],
+        "priorities": [
+          {
+            "rank": 1,
+            "action": "Build Emergency Fund to 1 Month",
+            "reasoning": "An emergency fund is crucial to protect you from unexpected expenses and avoid further debt.",
+            "dollarAmount": 850
+          },
+          {
+            "rank": 2,
+            "action": "Pay Off Credit Card Debt",
+            "reasoning": "Your credit card debt has a high interest rate, which can quickly grow if not addressed.",
+            "dollarAmount": 1100
+          },
+          {
+            "rank": 3,
+            "action": "Build Emergency Fund to 3 Months",
+            "reasoning": "A 3-month emergency fund provides greater financial security and stability.",
+            "dollarAmount": 950
+          }
+        ],
+        "bookRecommendation": {
+          "title": "The Psychology of Money",
+          "author": "Morgan Housel",
+          "hook": "This book emphasizes the importance of behavior and consistency in achieving financial success, which aligns with your current focus on foundational habits."
+        },
+        "oneActionThisWeek": "Set up an automatic transfer of $850 to your savings account.",
+        "assumptions": [
+          "Monthly surplus remains stable at $1950.",
+          "No new high-interest debt is incurred.",
+          "Emergency fund contributions are prioritized until the target is met."
+        ]
+      }
+    },
+    {
+      "id": "5253c74f-5bb0-42ba-b51f-4340647f355a",
+      "clientId": "9c11c406-36b4-42a1-9635-4b95c1ae7edb",
+      "createdAt": "2026-03-01T15:48:21.105Z",
+      "intakeData": {
+        "profile": {
+          "planType": "individual",
+          "goal": "Stated goal Buy a home in 3-4 years",
+          "age": 31,
+          "province": "Ontario",
+          "firstTimeBuyer": true
+        },
+        "expenses": {
+          "housing": 1900,
+          "transport": 160,
+          "utilities": 180,
+          "groceries": 600,
+          "otherFixed": 260,
+          "discretionary": 500
+        },
+        "accounts": {
+          "tfsa": {
+            "hasAccount": true,
+            "balance": 6200,
+            "roomAvailable": 18500
+          },
+          "rrsp": {
+            "hasAccount": true,
+            "balance": 0,
+            "roomAvailable": 22000
+          },
+          "fhsa": {
+            "hasAccount": false,
+            "balance": 0,
+            "roomAvailable": 0
+          }
+        },
+        "monthlyIncome": 5200,
+        "incomeStability": "stable",
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19.99,
+            "minimumPayment": 150
+          }
+        ],
+        "emergencyFundAmount": 1400,
+        "currentMonthlySavings": 300
+      },
+      "planData": {
+        "financialLevel": {
+          "current": 1,
+          "label": "Foundation",
+          "nextMilestone": "Pay Off Credit Card Debt"
+        },
+        "snapshot": {
+          "monthlyIncome": 5200,
+          "totalDebt": 4800,
+          "fixedCosts": 3250,
+          "discretionary": 1950,
+          "emergencyFundMonths": 0.45
+        },
+        "buckets": {
+          "current": {
+            "fixed": 3100,
+            "savings": 650,
+            "investments": 0,
+            "guiltFree": 1450
+          },
+          "target": {
+            "fixed": 55,
+            "investments": 10,
+            "savings": 10,
+            "guiltFree": 25
+          }
+        },
+        "emergencyFund": {
+          "currentMonths": 0.45,
+          "targetMonths": 3,
+          "monthlyToContribute": 650,
+          "projectedCompleteDate": "April 2027",
+          "accountRecommendation": "Use a high-interest savings account and verify CRA contribution room before registered contributions."
+        },
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19.99,
+            "minimumPayment": 150,
+            "recommendedPayment": 683,
+            "projectedPayoffDate": "October 2026",
+            "totalInterestSaved": 0
+          }
+        ],
+        "debtFreeDate": "April 2024",
+        "registeredAccounts": [
+          {
+            "type": "TFSA",
+            "balance": 6200,
+            "roomAvailable": 18500,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "RRSP",
+            "balance": 0,
+            "roomAvailable": 22000,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "FHSA",
+            "balance": 0,
+            "roomAvailable": 0,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          }
+        ],
+        "opportunityCost": {
+          "unusedRoomTotal": 18500,
+          "foregoingGrowth10yr": 11635,
+          "plainLanguage": "Delaying debt payoff increases interest costs, reducing funds available for your home purchase goal."
+        },
+        "monthlyAllocation": {
+          "emergencyFund": 650,
+          "debtPayoff": 683,
+          "fhsa": 0,
+          "rrsp": 0,
+          "tfsa": 0,
+          "guiltFree": 1450
+        },
+        "milestones": [
+          {
+            "label": "Build 1-Month Emergency Fund",
+            "projectedDate": "June 2026",
+            "celebrationMessage": "Emergency fund reaches $3100."
+          },
+          {
+            "label": "Pay Off Credit Card Debt",
+            "projectedDate": "July 2026",
+            "celebrationMessage": "Credit card balance is paid in full."
+          },
+          {
+            "label": "Build 3-Month Emergency Fund",
+            "projectedDate": "December 2026",
+            "celebrationMessage": "Emergency fund reaches $9300."
+          },
+          {
+            "label": "Start TFSA Contributions",
+            "projectedDate": "July 2026",
+            "celebrationMessage": "Emergency fund is complete and debt is cleared."
+          }
+        ],
+        "priorities": [
+          {
+            "rank": 1,
+            "action": "Build 1-Month Emergency Fund",
+            "reasoning": "An emergency fund prevents setbacks from unexpected expenses and is crucial before tackling debt.",
+            "dollarAmount": 650
+          },
+          {
+            "rank": 2,
+            "action": "Pay Off Credit Card Debt",
+            "reasoning": "High-interest debt is a financial drag, and clearing it frees up cash flow for savings and investments.",
+            "dollarAmount": 1300
+          },
+          {
+            "rank": 3,
+            "action": "Build 3-Month Emergency Fund",
+            "reasoning": "A larger emergency fund provides greater security and stability, allowing you to focus on long-term goals.",
+            "dollarAmount": 650
+          }
+        ],
+        "bookRecommendation": {
+          "title": "The Psychology of Money",
+          "author": "Morgan Housel",
+          "hook": "Understanding the behavior behind financial decisions can help you stay consistent and overcome challenges."
+        },
+        "oneActionThisWeek": "Set up an automatic transfer of $650 to your savings account.",
+        "assumptions": [
+          "Monthly surplus remains stable at $1950.",
+          "No new high-interest debt is incurred.",
+          "Emergency fund contributions are prioritized until 1-month target is reached."
+        ]
+      }
+    },
+    {
+      "id": "bee7bae8-530f-4c87-8f83-c391a52607a8",
+      "clientId": "a0bbdd04-d08e-445e-8a19-0e1738eb52b3",
+      "createdAt": "2026-03-01T15:38:28.384Z",
+      "intakeData": {
+        "profile": {
+          "planType": "individual",
+          "goal": "Buy a home in 3-4 years",
+          "age": 31,
+          "province": "Ontario",
+          "firstTimeBuyer": true
+        },
+        "expenses": {
+          "housing": 3100,
+          "transport": 160,
+          "utilities": 80,
+          "groceries": 900,
+          "otherFixed": 60,
+          "discretionary": 0
+        },
+        "accounts": {
+          "tfsa": {
+            "hasAccount": true,
+            "balance": 6200,
+            "roomAvailable": 18500
+          },
+          "rrsp": {
+            "hasAccount": true,
+            "balance": 0,
+            "roomAvailable": 22000
+          },
+          "fhsa": {
+            "hasAccount": false,
+            "balance": 0,
+            "roomAvailable": 0
+          }
+        },
+        "monthlyIncome": 5200,
+        "incomeStability": "stable",
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19.99,
+            "minimumPayment": 150
+          }
+        ],
+        "emergencyFundAmount": 1400,
+        "currentMonthlySavings": 300
+      },
+      "planData": {
+        "financialLevel": {
+          "current": 1,
+          "label": "Foundation",
+          "nextMilestone": "Pay Off Credit Card Debt"
+        },
+        "snapshot": {
+          "monthlyIncome": 5200,
+          "totalDebt": 4800,
+          "fixedCosts": 4450,
+          "discretionary": 750,
+          "emergencyFundMonths": 0.33
+        },
+        "buckets": {
+          "current": {
+            "fixed": 4300,
+            "savings": 750,
+            "investments": 0,
+            "guiltFree": 150
+          },
+          "target": {
+            "fixed": 55,
+            "investments": 10,
+            "savings": 10,
+            "guiltFree": 25
+          }
+        },
+        "emergencyFund": {
+          "currentMonths": 0.33,
+          "targetMonths": 3,
+          "monthlyToContribute": 750,
+          "projectedCompleteDate": "July 2027",
+          "accountRecommendation": "Use a high-interest savings account and verify CRA contribution room before registered contributions."
+        },
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19.99,
+            "minimumPayment": 150,
+            "recommendedPayment": 263,
+            "projectedPayoffDate": "April 2027",
+            "totalInterestSaved": 0
+          }
+        ],
+        "debtFreeDate": "May 2024",
+        "registeredAccounts": [
+          {
+            "type": "TFSA",
+            "balance": 6200,
+            "roomAvailable": 18500,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "RRSP",
+            "balance": 0,
+            "roomAvailable": 22000,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "FHSA",
+            "balance": 0,
+            "roomAvailable": 0,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          }
+        ],
+        "opportunityCost": {
+          "unusedRoomTotal": 18500,
+          "foregoingGrowth10yr": 11635,
+          "plainLanguage": "Delaying debt payoff increases interest costs, reducing funds available for future investments."
+        },
+        "monthlyAllocation": {
+          "emergencyFund": 750,
+          "debtPayoff": 263,
+          "fhsa": 0,
+          "rrsp": 0,
+          "tfsa": 0,
+          "guiltFree": 150
+        },
+        "milestones": [
+          {
+            "label": "Build Emergency Fund to 1 Month",
+            "projectedDate": "September 2026",
+            "celebrationMessage": "Emergency fund reaches $4,300."
+          },
+          {
+            "label": "Pay Off Credit Card Debt",
+            "projectedDate": "October 2026",
+            "celebrationMessage": "Credit card balance is $0."
+          },
+          {
+            "label": "Build Emergency Fund to 3 Months",
+            "projectedDate": "December 2026",
+            "celebrationMessage": "Emergency fund reaches $12,900."
+          },
+          {
+            "label": "Start TFSA Contributions",
+            "projectedDate": "July 2026",
+            "celebrationMessage": "Emergency fund is at 3 months and credit card debt is cleared."
+          }
+        ],
+        "priorities": [
+          {
+            "rank": 1,
+            "action": "Build Emergency Fund to 1 Month",
+            "reasoning": "An emergency fund protects you from unexpected expenses and prevents the need for high-interest debt.",
+            "dollarAmount": 750
+          },
+          {
+            "rank": 2,
+            "action": "Pay Off Credit Card Debt",
+            "reasoning": "Paying off high-interest debt saves you money on interest and improves cash flow.",
+            "dollarAmount": 750
+          },
+          {
+            "rank": 3,
+            "action": "Build Emergency Fund to 3 Months",
+            "reasoning": "A 3-month emergency fund provides greater financial security and stability.",
+            "dollarAmount": 750
+          }
+        ],
+        "bookRecommendation": {
+          "title": "The Psychology of Money",
+          "author": "Morgan Housel",
+          "hook": "This book highlights how behavior impacts financial success, which is crucial as you work towards your home-buying goal."
+        },
+        "oneActionThisWeek": "Set up an automatic transfer of $750 to your emergency fund savings account.",
+        "assumptions": [
+          "Monthly surplus remains stable at $750.",
+          "No new high-interest debt is incurred.",
+          "Emergency fund contributions are prioritized until the target is met."
+        ]
+      }
+    },
+    {
+      "id": "a92d2c9d-2648-4be5-a723-7a9b2215e2e3",
+      "clientId": "a0bbdd04-d08e-445e-8a19-0e1738eb52b3",
+      "createdAt": "2026-03-01T15:38:27.555Z",
+      "intakeData": {
+        "profile": {
+          "planType": "individual",
+          "goal": "Buy a home in 3-4 years",
+          "age": 31,
+          "province": "Ontario",
+          "firstTimeBuyer": true
+        },
+        "expenses": {
+          "housing": 3100,
+          "transport": 160,
+          "utilities": 80,
+          "groceries": 900,
+          "otherFixed": 60,
+          "discretionary": 0
+        },
+        "accounts": {
+          "tfsa": {
+            "hasAccount": true,
+            "balance": 6200,
+            "roomAvailable": 18500
+          },
+          "rrsp": {
+            "hasAccount": true,
+            "balance": 0,
+            "roomAvailable": 22000
+          },
+          "fhsa": {
+            "hasAccount": false,
+            "balance": 0,
+            "roomAvailable": 0
+          }
+        },
+        "monthlyIncome": 5200,
+        "incomeStability": "stable",
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19.99,
+            "minimumPayment": 150
+          }
+        ],
+        "emergencyFundAmount": 1400,
+        "currentMonthlySavings": 300
+      },
+      "planData": {
+        "financialLevel": {
+          "current": 1,
+          "label": "Foundation",
+          "nextMilestone": "Pay Off High-Interest Credit Card Debt"
+        },
+        "snapshot": {
+          "monthlyIncome": 5200,
+          "totalDebt": 4800,
+          "fixedCosts": 4450,
+          "discretionary": 750,
+          "emergencyFundMonths": 0.33
+        },
+        "buckets": {
+          "current": {
+            "fixed": 4300,
+            "savings": 250,
+            "investments": 0,
+            "guiltFree": 650
+          },
+          "target": {
+            "fixed": 55,
+            "investments": 10,
+            "savings": 10,
+            "guiltFree": 25
+          }
+        },
+        "emergencyFund": {
+          "currentMonths": 0.33,
+          "targetMonths": 3,
+          "monthlyToContribute": 250,
+          "projectedCompleteDate": "January 2030",
+          "accountRecommendation": "Use a high-interest savings account and verify CRA contribution room before registered contributions."
+        },
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19.99,
+            "minimumPayment": 150,
+            "recommendedPayment": 263,
+            "projectedPayoffDate": "April 2027",
+            "totalInterestSaved": 0
+          }
+        ],
+        "debtFreeDate": "August 2024",
+        "registeredAccounts": [
+          {
+            "type": "TFSA",
+            "balance": 6200,
+            "roomAvailable": 18500,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "RRSP",
+            "balance": 0,
+            "roomAvailable": 22000,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "FHSA",
+            "balance": 0,
+            "roomAvailable": 0,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          }
+        ],
+        "opportunityCost": {
+          "unusedRoomTotal": 18500,
+          "foregoingGrowth10yr": 11635,
+          "plainLanguage": "Delaying debt payoff increases interest costs, reducing funds available for future home purchase."
+        },
+        "monthlyAllocation": {
+          "emergencyFund": 250,
+          "debtPayoff": 263,
+          "fhsa": 0,
+          "rrsp": 0,
+          "tfsa": 0,
+          "guiltFree": 650
+        },
+        "milestones": [
+          {
+            "label": "Build 1-Month Emergency Fund",
+            "projectedDate": "March 2027",
+            "celebrationMessage": "Emergency fund reaches $4300."
+          },
+          {
+            "label": "Pay Off High-Interest Credit Card Debt",
+            "projectedDate": "January 2027",
+            "celebrationMessage": "Credit card balance is zero."
+          },
+          {
+            "label": "Build 3-Month Emergency Fund",
+            "projectedDate": "March 2027",
+            "celebrationMessage": "Emergency fund reaches $12900."
+          }
+        ],
+        "priorities": [
+          {
+            "rank": 1,
+            "action": "Build 1-Month Emergency Fund",
+            "reasoning": "An emergency fund protects you from unexpected expenses and prevents reliance on high-interest debt.",
+            "dollarAmount": 250
+          },
+          {
+            "rank": 2,
+            "action": "Pay Off High-Interest Credit Card Debt",
+            "reasoning": "Paying off high-interest debt saves you money on interest and improves cash flow.",
+            "dollarAmount": 500
+          },
+          {
+            "rank": 3,
+            "action": "Build 3-Month Emergency Fund",
+            "reasoning": "A larger emergency fund provides greater financial security and stability.",
+            "dollarAmount": 750
+          }
+        ],
+        "bookRecommendation": {
+          "title": "The Psychology of Money",
+          "author": "Morgan Housel",
+          "hook": "This book helps you understand the behavioral aspects of money management, which is crucial for consistent financial progress."
+        },
+        "oneActionThisWeek": "Set up an automatic transfer of $250 to your emergency fund.",
+        "assumptions": [
+          "Monthly surplus remains stable at $750.",
+          "No new high-interest debt is incurred.",
+          "Emergency fund contributions are prioritized until 1-month target is reached."
+        ]
+      }
+    },
+    {
+      "id": "0afc73c4-1ddd-4d80-bd11-db4cd7a2addc",
+      "clientId": "a0bbdd04-d08e-445e-8a19-0e1738eb52b3",
+      "createdAt": "2026-03-01T15:34:47.390Z",
+      "intakeData": {
+        "profile": {
+          "planType": "individual",
+          "goal": "Buy a home in 3-4 years",
+          "age": 31,
+          "province": "Ontario",
+          "firstTimeBuyer": true
+        },
+        "expenses": {
+          "housing": 3100,
+          "transport": 160,
+          "utilities": 80,
+          "groceries": 900,
+          "otherFixed": 60,
+          "discretionary": 0
+        },
+        "accounts": {
+          "tfsa": {
+            "hasAccount": true,
+            "balance": 6200,
+            "roomAvailable": 18500
+          },
+          "rrsp": {
+            "hasAccount": true,
+            "balance": 0,
+            "roomAvailable": 22000
+          },
+          "fhsa": {
+            "hasAccount": false,
+            "balance": 0,
+            "roomAvailable": 0
+          }
+        },
+        "monthlyIncome": 5200,
+        "incomeStability": "stable",
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19.99,
+            "minimumPayment": 150
+          }
+        ],
+        "emergencyFundAmount": 1400,
+        "currentMonthlySavings": 300
+      },
+      "planData": {
+        "financialLevel": {
+          "current": 1,
+          "label": "Foundation",
+          "nextMilestone": "Pay Off High-Interest Credit Card Debt"
+        },
+        "snapshot": {
+          "monthlyIncome": 5200,
+          "totalDebt": 4800,
+          "fixedCosts": 4450,
+          "discretionary": 750,
+          "emergencyFundMonths": 0.33
+        },
+        "buckets": {
+          "current": {
+            "fixed": 4300,
+            "savings": 750,
+            "investments": 0,
+            "guiltFree": 150
+          },
+          "target": {
+            "fixed": 55,
+            "investments": 10,
+            "savings": 10,
+            "guiltFree": 25
+          }
+        },
+        "emergencyFund": {
+          "currentMonths": 0.33,
+          "targetMonths": 3,
+          "monthlyToContribute": 750,
+          "projectedCompleteDate": "July 2027",
+          "accountRecommendation": "Use a high-interest savings account and verify CRA contribution room before registered contributions."
+        },
+        "debts": [
+          {
+            "name": "Credit Card",
+            "balance": 4800,
+            "interestRate": 19.99,
+            "minimumPayment": 150,
+            "recommendedPayment": 263,
+            "projectedPayoffDate": "April 2027",
+            "totalInterestSaved": 0
+          }
+        ],
+        "debtFreeDate": "December 2024",
+        "registeredAccounts": [
+          {
+            "type": "TFSA",
+            "balance": 6200,
+            "roomAvailable": 18500,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "RRSP",
+            "balance": 0,
+            "roomAvailable": 22000,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          },
+          {
+            "type": "FHSA",
+            "balance": 0,
+            "roomAvailable": 0,
+            "recommendedMonthlyContribution": 0,
+            "yearToMaximize": 2026
+          }
+        ],
+        "opportunityCost": {
+          "unusedRoomTotal": 18500,
+          "foregoingGrowth10yr": 11635,
+          "plainLanguage": "Delaying debt payoff increases interest costs and limits your ability to save for a home."
+        },
+        "monthlyAllocation": {
+          "emergencyFund": 750,
+          "debtPayoff": 263,
+          "fhsa": 0,
+          "rrsp": 0,
+          "tfsa": 0,
+          "guiltFree": 150
+        },
+        "milestones": [
+          {
+            "label": "Build 1-Month Emergency Fund",
+            "projectedDate": "September 2026",
+            "celebrationMessage": "Emergency fund reaches $4300."
+          },
+          {
+            "label": "Pay Off High-Interest Credit Card Debt",
+            "projectedDate": "September 2026",
+            "celebrationMessage": "Credit card balance is zero."
+          },
+          {
+            "label": "Build 3-Month Emergency Fund",
+            "projectedDate": "March 2027",
+            "celebrationMessage": "Emergency fund reaches $12900."
+          },
+          {
+            "label": "Open and Contribute to TFSA",
+            "projectedDate": "March 2028",
+            "celebrationMessage": "TFSA contributions are regular and on track."
+          }
+        ],
+        "priorities": [
+          {
+            "rank": 1,
+            "action": "Build 1-Month Emergency Fund",
+            "reasoning": "An emergency fund is crucial to avoid using high-interest debt for unexpected expenses.",
+            "dollarAmount": 750
+          },
+          {
+            "rank": 2,
+            "action": "Pay Off High-Interest Credit Card Debt",
+            "reasoning": "Paying off high-interest debt frees up cash flow and reduces financial stress.",
+            "dollarAmount": 750
+          },
+          {
+            "rank": 3,
+            "action": "Build 3-Month Emergency Fund",
+            "reasoning": "A larger emergency fund provides greater security and stability.",
+            "dollarAmount": 750
+          }
+        ],
+        "bookRecommendation": {
+          "title": "The Psychology of Money",
+          "author": "Morgan Housel",
+          "hook": "This book will help you understand how behavior and consistency play a crucial role in financial success."
+        },
+        "oneActionThisWeek": "Set up an automatic transfer of $750 to your savings account.",
+        "assumptions": [
+          "Monthly surplus remains stable at $750.",
+          "No new high-interest debt is incurred.",
+          "Emergency fund contributions are prioritized until fully funded."
+        ]
+      }
+    },
+    {
       "id": "d541477b-12fd-46ab-9dd7-81aceaea427e",
       "clientId": "f7cd9b55-fe1b-45c8-8779-7d6a70181d2a",
       "createdAt": "2026-02-27T22:40:09.947Z",

@@ -149,6 +149,12 @@ export function buildFallbackAgentPlan(profile, metrics) {
   const investmentAmount = starterFundGap > 0 ? 0 : Math.max(0, Math.round(monthlyIncome * 0.1));
   const guiltFree = Math.max(0, Math.round(monthlyIncome - fixed - savingsAmount - debtAmount - investmentAmount));
 
+  // Create goal-aware coach opening
+  const userGoal = profile.goal || "Build a stable financial plan";
+  const goalContext = userGoal.toLowerCase().includes("home") || profile.isFirstTimeBuyer
+    ? `Your goal is ${userGoal.toLowerCase()}. To get there, you need stability first.`
+    : `Your goal is ${userGoal.toLowerCase()}.`;
+
   const milestones = [];
 
   milestones.push({
@@ -159,6 +165,7 @@ export function buildFallbackAgentPlan(profile, metrics) {
     targetLabel: "1 month of essentials",
     monthlyContribution: savingsAmount,
     estimatedTimeline: starterFundGap > 0 ? `${Math.max(1, Math.ceil(starterFundGap / Math.max(savingsAmount, 1)))} months` : "Complete",
+    estimatedCompletionDate: starterFundGap > 0 ? monthLabelFromNow(Math.max(1, Math.ceil(starterFundGap / Math.max(savingsAmount, 1)))) : "Complete",
     whyThisOrder: "This protects you from new high-interest debt when life hits unexpectedly.",
     thisWeekAction: `Set up an automatic $${savingsAmount} transfer to a high-interest savings account on payday.`,
     unlocksWhen: `Emergency fund reaches $${metrics.emergencyFundTarget1Month}.`,
@@ -173,6 +180,7 @@ export function buildFallbackAgentPlan(profile, metrics) {
       targetLabel: "Total non-mortgage debt",
       monthlyContribution: debtAmount,
       estimatedTimeline: `${Math.max(1, metrics.payoffMonths)} months`,
+      estimatedCompletionDate: monthLabelFromNow(metrics.payoffMonths),
       whyThisOrder: "Debt interest above savings returns slows wealth building.",
       thisWeekAction: `Set a recurring extra payment of $${Math.max(0, debtAmount - metrics.totalDebtMinimums)} on your highest APR debt.`,
       unlocksWhen: "All high-interest balances are at $0.",
@@ -187,6 +195,7 @@ export function buildFallbackAgentPlan(profile, metrics) {
     targetLabel: metrics.fhsaEligible ? "FHSA room" : "Registered account room",
     monthlyContribution: investmentAmount,
     estimatedTimeline: investmentAmount > 0 ? `${Math.max(1, Math.ceil((metrics.fhsaEligible ? profile.accounts.fhsa.room : profile.accounts.tfsa.room) / investmentAmount))} months` : "After safety milestones",
+    estimatedCompletionDate: investmentAmount > 0 ? monthLabelFromNow(Math.max(1, Math.ceil((metrics.fhsaEligible ? profile.accounts.fhsa.room : profile.accounts.tfsa.room) / investmentAmount))) : "After safety milestones",
     whyThisOrder: "Once stable and debt-light, tax-advantaged accounts accelerate long-term progress.",
     thisWeekAction: metrics.fhsaEligible
       ? `Open or verify your FHSA and schedule $${Math.max(200, investmentAmount)} monthly contributions.`
@@ -198,8 +207,8 @@ export function buildFallbackAgentPlan(profile, metrics) {
     financialLevel: level.level,
     financialLevelLabel: level.label,
     coachOpening: starterFundGap > 0
-      ? "Your goal is strong, but your current risk is low cash protection. Before aggressive debt or investing moves, your first win is a starter emergency buffer so surprises stop derailing progress."
-      : "Your baseline is stable enough to sequence debt and account contributions in a coaching order that protects momentum.",
+      ? `${goalContext} Your current risk is low cash protection. Before aggressive debt or investing moves, your first win is a starter emergency buffer so surprises stop derailing progress.`
+      : `${goalContext} Your baseline is stable enough to sequence debt and account contributions in a coaching order that protects momentum.`,
     milestones,
     buckets: {
       fixed: { percent: Math.round((fixed / monthlyIncome) * 100), amount: fixed },

@@ -101,6 +101,8 @@ export default function PlannerPage() {
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const [generationError, setGenerationError] = useState("");
   const [intakeValidationError, setIntakeValidationError] = useState("");
+  const [showDetails, setShowDetails] = useState(false);
+  const [expandedActions, setExpandedActions] = useState(new Set());
   const [profileForm, setProfileForm] = useState({ goal: "", age: "", province: "", firstTimeBuyer: "" });
   const [incomeForm, setIncomeForm] = useState({ monthlyIncome: "", incomeStability: "" });
   const [expensesForm, setExpensesForm] = useState({
@@ -112,6 +114,7 @@ export default function PlannerPage() {
     discretionary: "",
   });
   const [debtForm, setDebtForm] = useState({ hasDebts: "yes", name: "", balance: "", interestRate: "", minimumPayment: "" });
+  const [debtsList, setDebtsList] = useState([]);
   const [accountsForm, setAccountsForm] = useState({
     tfsaHas: "",
     tfsaBalance: "",
@@ -141,6 +144,18 @@ export default function PlannerPage() {
   const completedPhases = completedPhasesByKey[currentPhase] ?? 0;
   const phaseProgress = Math.max(1, Math.min(completedPhases + 1, INTAKE_TABS.length));
   const intakePct = Math.round((completedPhases / 6) * 100);
+
+  const toggleActionExpansion = (index) => {
+    setExpandedActions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
 
   const snapshot = useMemo(() => buildSnapshot({ planType, monthlyIncome }), [planType, monthlyIncome]);
   const plan = useMemo(() => generatePlan(snapshot), [snapshot]);
@@ -266,17 +281,18 @@ export default function PlannerPage() {
         return;
       }
 
-      setCollectedData((prev) => mergeCollectedData(prev, {
-        debts: [
-          {
-            name: debtForm.name.trim(),
-            balance,
-            interestRate,
-            minimumPayment,
-          },
-        ],
-      }));
-      goToNextIntakePhase();
+      const newDebt = {
+        name: debtForm.name.trim(),
+        balance,
+        interestRate,
+        minimumPayment,
+      };
+
+      const updatedDebtsList = [...debtsList, newDebt];
+      setDebtsList(updatedDebtsList);
+
+      setDebtForm({ hasDebts: "yes", name: "", balance: "", interestRate: "", minimumPayment: "" });
+      setIntakeValidationError("");
       return;
     }
 
@@ -331,6 +347,7 @@ export default function PlannerPage() {
       }
 
       setCollectedData((prev) => mergeCollectedData(prev, {
+        debts: debtsList,
         emergencyFundAmount,
         currentMonthlySavings,
       }));
@@ -706,7 +723,7 @@ export default function PlannerPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background-light text-slate-900">
+    <div className="min-h-screen flex flex-col bg-background-light text-slate-900" style={{fontFamily: 'Manrope, sans-serif'}}>
       {/* Reasoning step is full-screen dark, no header/nav */}
       {currentStep === "reasoning" ? (
         <div className="min-h-screen flex flex-col items-center justify-center px-8 text-center" style={{ backgroundColor: "#221d10" }}>
@@ -802,7 +819,7 @@ export default function PlannerPage() {
             </header>
           )}
 
-          <main className="flex-1 max-w-md mx-auto w-full px-6 pb-24">
+          <main className="flex-1 w-full px-4 pb-24">
 
             {/* ─── CHECKLIST (screen3) ─── */}
             {currentStep === "checklist" && (
@@ -817,7 +834,7 @@ export default function PlannerPage() {
                   <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#C5A059" }}>
                     Financial Planning Agent
                   </span>
-                  <h1 className="text-2xl font-bold mt-2 text-slate-900">
+                  <h1 className="text-xl font-bold mt-2 text-slate-900">
                     Your personalized Canadian financial plan
                   </h1>
                   <p className="text-sm text-slate-500 mt-2 leading-relaxed">
@@ -857,29 +874,24 @@ export default function PlannerPage() {
                 </div>
 
                 <header className="mb-8">
-                  <div className="flex justify-between items-center mb-6">
-                    <span className="text-xs font-bold tracking-[0.2em] uppercase opacity-60">Before you start</span>
-                    <button className="p-2 -mr-2">
-                      <span className="material-symbols-outlined">close</span>
-                    </button>
-                  </div>
-                  <h2 className="text-2xl font-semibold leading-tight tracking-tight mb-3">
+                  <span className="text-xs font-bold tracking-[0.2em] uppercase opacity-60">Before you start</span>
+                  <h2 className="text-xl font-semibold leading-tight tracking-tight mb-3">
                     Have these handy
                   </h2>
-                  <p className="text-base opacity-70 leading-relaxed font-light">
+                  <p className="text-sm opacity-70 leading-relaxed">
                     To give you the most accurate plan, it helps to have these items ready before we start.
                   </p>
                 </header>
 
                 <div className="flex-grow space-y-4">
                   {CHECKLIST_ITEMS.map((item) => (
-                    <label key={item.label} className="group flex items-center p-5 bg-white rounded-2xl border border-black/5 ios-shadow active:scale-[0.98] transition-all cursor-pointer">
+                    <label key={item.label} className="group flex items-center p-4 bg-white rounded-xl border border-slate-100 ios-shadow active:scale-[0.98] transition-all cursor-pointer">
                       <div className="relative flex items-center justify-center">
                         <input type="checkbox" className="peer h-6 w-6 border-2 border-primary/20 rounded-full bg-transparent checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0 transition-colors" />
                         <span className="material-symbols-outlined absolute text-white text-sm opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none">check</span>
                       </div>
                       <div className="ml-4">
-                        <h3 className="font-medium text-[17px]">{item.label}</h3>
+                        <h3 className="font-semibold text-base">{item.label}</h3>
                         <p className="text-sm opacity-50">{item.sub}</p>
                       </div>
                     </label>
@@ -907,7 +919,7 @@ export default function PlannerPage() {
               <div className="min-h-[80vh] flex flex-col pt-12 pb-10">
                 <header className="mb-10">
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Before intake</p>
-                  <h1 className="text-4xl leading-tight font-semibold mt-3">Who is this plan for?</h1>
+                  <h1 className="text-2xl leading-tight font-semibold mt-3">Who is this plan for?</h1>
                   <p className="text-slate-600 mt-4 leading-relaxed">
                     Choose a plan type first. This changes account sequencing and action priorities.
                   </p>
@@ -915,7 +927,7 @@ export default function PlannerPage() {
 
                 <div className="space-y-4 flex-1">
                   <button
-                    className={`w-full text-left p-6 rounded-2xl bg-white shadow-sm transition-all ${
+                    className={`w-full text-left p-4 rounded-xl bg-white shadow-sm transition-all ${
                       planType === "individual" ? "border-2 border-primary" : "border border-slate-200"
                     }`}
                     onClick={() => setPlanType("individual")}
@@ -926,7 +938,7 @@ export default function PlannerPage() {
                   </button>
 
                   <button
-                    className={`w-full text-left p-6 rounded-2xl bg-white transition-all ${
+                    className={`w-full text-left p-4 rounded-xl bg-white transition-all ${
                       planType === "household" ? "border-2 border-primary shadow-sm" : "border border-slate-200"
                     }`}
                     onClick={() => setPlanType("household")}
@@ -991,7 +1003,7 @@ export default function PlannerPage() {
 
                 {/* Intake content */}
                 <div className="flex-1 min-h-0 overflow-y-auto py-5 space-y-5">
-                  <section className="bg-white border border-slate-100 rounded-2xl p-4 space-y-4">
+                  <section className="bg-white border border-slate-100 rounded-xl p-4 space-y-4">
                     <div>
                       <p className="text-[11px] uppercase tracking-widest font-semibold text-slate-400">{PHASE_META[currentPhase]?.label || "Intake"}</p>
                       <h3 className="text-base font-semibold mt-1">Enter this section in one pass</h3>
@@ -1049,12 +1061,64 @@ export default function PlannerPage() {
                           <button type="button" onClick={() => setDebtForm((prev) => ({ ...prev, hasDebts: "yes" }))} className={`rounded-xl border px-3 py-2 text-sm ${debtForm.hasDebts === "yes" ? "border-primary text-primary" : "border-slate-200 text-slate-600"}`}>I have debt</button>
                           <button type="button" onClick={() => setDebtForm((prev) => ({ ...prev, hasDebts: "no" }))} className={`rounded-xl border px-3 py-2 text-sm ${debtForm.hasDebts === "no" ? "border-primary text-primary" : "border-slate-200 text-slate-600"}`}>No debt</button>
                         </div>
+                        
                         {debtForm.hasDebts === "yes" && (
-                          <div className="grid grid-cols-2 gap-2">
-                            <input value={debtForm.name} onChange={(e) => setDebtForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="Debt name" className="col-span-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
-                            <input value={debtForm.balance} onChange={(e) => setDebtForm((prev) => ({ ...prev, balance: e.target.value }))} placeholder="Balance" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
-                            <input value={debtForm.interestRate} onChange={(e) => setDebtForm((prev) => ({ ...prev, interestRate: e.target.value }))} placeholder="APR %" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
-                            <input value={debtForm.minimumPayment} onChange={(e) => setDebtForm((prev) => ({ ...prev, minimumPayment: e.target.value }))} placeholder="Minimum payment" type="number" className="col-span-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                          <>
+                            <div className="grid grid-cols-2 gap-2">
+                              <input value={debtForm.name} onChange={(e) => setDebtForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="Debt name" className="col-span-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                              <input value={debtForm.balance} onChange={(e) => setDebtForm((prev) => ({ ...prev, balance: e.target.value }))} placeholder="Balance" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                              <input value={debtForm.interestRate} onChange={(e) => setDebtForm((prev) => ({ ...prev, interestRate: e.target.value }))} placeholder="APR %" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                              <input value={debtForm.minimumPayment} onChange={(e) => setDebtForm((prev) => ({ ...prev, minimumPayment: e.target.value }))} placeholder="Minimum payment" type="number" className="col-span-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                            </div>
+                            
+                            <button 
+                              type="button" 
+                              onClick={() => {
+                                const balance = Number(debtForm.balance);
+                                const interestRate = Number(debtForm.interestRate);
+                                const minimumPayment = Number(debtForm.minimumPayment);
+                                
+                                if (!debtForm.name.trim() || isNaN(balance) || isNaN(interestRate) || isNaN(minimumPayment) || balance < 0 || interestRate < 0 || minimumPayment < 0) {
+                                  setIntakeValidationError("Add debt name, balance, APR, and minimum payment to continue.");
+                                  return;
+                                }
+                                
+                                const newDebt = {
+                                  name: debtForm.name.trim(),
+                                  balance,
+                                  interestRate,
+                                  minimumPayment,
+                                };
+                                
+                                setDebtsList(prev => [...prev, newDebt]);
+                                setDebtForm({ hasDebts: "yes", name: "", balance: "", interestRate: "", minimumPayment: "" });
+                                setIntakeValidationError("");
+                              }}
+                              className="w-full bg-slate-100 text-slate-700 rounded-xl px-3 py-2 text-sm font-medium hover:bg-slate-200 transition-colors"
+                            >
+                              Add debt
+                            </button>
+                          </>
+                        )}
+                        
+                        {debtsList.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Debts added ({debtsList.length})</p>
+                            {debtsList.map((debt, index) => (
+                              <div key={index} className="bg-slate-50 rounded-lg p-2 flex justify-between items-center">
+                                <div className="text-sm">
+                                  <span className="font-medium">{debt.name}</span>
+                                  <span className="text-slate-500 ml-2">${debt.balance} @ {debt.interestRate}%</span>
+                                </div>
+                                <button 
+                                  type="button"
+                                  onClick={() => setDebtsList(prev => prev.filter((_, i) => i !== index))}
+                                  className="text-red-500 hover:text-red-700 text-xs"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>
@@ -1204,158 +1268,222 @@ export default function PlannerPage() {
             {/* ─── PLAN (screen6) ─── */}
             {currentStep === "plan" && (
               <div className="pb-10">
-                <div className="mb-10 pt-6">
-                  <h2 className="text-4xl leading-tight mb-3">The 3 Actions</h2>
-                  <p className="text-slate-500 text-lg font-light leading-relaxed">
-                    Layer 1 of 3. Based on your goals and current numbers, these are your highest impact moves for this month.
-                  </p>
-                </div>
-
-                {emergencyFundMonths < 1 && (
-                  <section className="mb-8 bg-white p-6 rounded-2xl border border-amber-200">
-                    <h3 className="text-lg font-semibold text-amber-700">Priority alert: Build a starter emergency fund</h3>
-                    <p className="text-sm text-slate-700 mt-2">
-                      You currently have {emergencyFundMonths.toFixed(1)} months of essentials saved. Before investing, build at least 1 month of buffer so one surprise expense does not derail your plan.
-                    </p>
-                  </section>
+                {/* Goal acknowledgment */}
+                {effectivePlan?.coachOpening && (
+                  <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <p className="text-sm text-amber-800 leading-relaxed">{effectivePlan.coachOpening}</p>
+                  </div>
                 )}
 
-                <div className="space-y-4 mb-12">
-                  {displayedPriorities.map((priority, index) => (
-                    <div key={`${priority.rank}-${priority.action}`} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
-                      {index === 0 && <div className="absolute top-0 left-0 w-1.5 h-full bg-primary" />}
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 block ${index === 0 ? "text-primary" : "text-slate-400"}`}>
-                            Priority {String(priority.rank || index + 1).padStart(2, "0")}
-                          </span>
-                          <h3 className="text-xl font-medium leading-snug">{priority.action}</h3>
-                          <p className="text-slate-500 text-sm mt-1">
-                            Suggested monthly amount: {formatCurrency(Number(priority.dollarAmount || 0))}
-                          </p>
-                        </div>
-                        <span className="material-symbols-outlined text-slate-300">expand_more</span>
+                {/* Single plan card */}
+                <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-6">
+                  {/* Financial level */}
+                  <div className="mb-6 pb-4 border-b border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs uppercase tracking-widest text-slate-400 font-semibold">Current Level</p>
+                        <p className="text-lg font-semibold text-slate-900">
+                          {effectivePlan?.financialLevel?.label || plan.level || "Foundation"}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs uppercase tracking-widest text-slate-400 font-semibold">Next Milestone</p>
+                        <p className="text-sm font-medium text-slate-600">
+                          {effectivePlan?.financialLevel?.nextMilestone || "Build consistency"}
+                        </p>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
 
-                <section className="mb-12 bg-white p-6 rounded-2xl border border-slate-100">
-                  <h3 className="text-2xl serif-title">You could be debt-free by {debtFreeDateLabel}</h3>
-                </section>
-
-                {/* Layer 2 */}
-                <section className="mb-12">
+                  {/* Actions */}
                   <div className="mb-6">
-                    <h3 className="text-3xl mb-2">Why these actions</h3>
-                    <p className="text-slate-500 text-base font-light">Layer 2 of 3. Each action is tied to your numbers.</p>
+                    <h3 className="text-lg font-semibold mb-4">Your Actions This Month</h3>
+                    <div className="space-y-3">
+                      {displayedPriorities.map((priority, index) => {
+                        const isExpanded = expandedActions.has(index);
+                        return (
+                          <div key={`${priority.rank}-${priority.action}`} className="bg-slate-50 rounded-lg overflow-hidden">
+                            <div 
+                              className="p-4 relative overflow-hidden cursor-pointer hover:bg-slate-100 transition-colors"
+                              onClick={() => toggleActionExpansion(index)}
+                            >
+                              {index === 0 && <div className="absolute top-0 left-0 w-1 h-full bg-primary" />}
+                              <div className="pl-4">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">
+                                      Priority {String(priority.rank || index + 1).padStart(2, "0")}
+                                    </p>
+                                    <h4 className="font-semibold text-slate-900 mb-2">{priority.action}</h4>
+                                    <p className="text-sm text-slate-600 mb-1">
+                                      {formatCurrency(Number(priority.dollarAmount || 0))}/month for {priority.duration}
+                                    </p>
+                                    {priority.completionDate && priority.completionDate !== "To be calculated" && (
+                                      <p className="text-xs text-slate-500">
+                                        Complete by {priority.completionDate}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <span className="material-symbols-outlined text-slate-400 ml-2">
+                                    {isExpanded ? "expand_less" : "expand_more"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {isExpanded && priority.reasoning && (
+                              <div className="px-4 pb-4 pl-8 border-t border-slate-200">
+                                <p className="text-sm text-slate-600 mt-3">{priority.reasoning}</p>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="space-y-4">
-                    {displayedPriorities.map((priority, index) => (
-                      <article key={`${priority.rank}-why`} className="bg-white p-5 rounded-2xl border border-slate-100">
-                        <h4 className="font-semibold mb-2">Action {index + 1} reasoning</h4>
-                        <p className="text-sm text-slate-600">{priority.reasoning}</p>
-                      </article>
-                    ))}
+
+                  {/* Timeline preview */}
+                  {effectivePlan?.milestones && effectivePlan.milestones.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-4">Your Path Forward</h3>
+                      
+                      {/* Visual progress bar */}
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs text-slate-500">Progress to goal</span>
+                          <span className="text-xs text-slate-500">
+                            {effectivePlan.milestones.filter(m => m.status === "current" || m.status === "next").length} of {effectivePlan.milestones.length} active
+                          </span>
+                        </div>
+                        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-primary transition-all duration-500"
+                            style={{ 
+                              width: `${(effectivePlan.milestones.filter(m => m.status === "current" || m.status === "next").length / effectivePlan.milestones.length) * 100}%` 
+                            }}
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Milestone list */}
+                      <div className="space-y-3">
+                        {effectivePlan.milestones.slice(0, 3).map((milestone, index) => {
+                          const isActive = milestone.status === "current" || milestone.status === "next";
+                          const isCompleted = milestone.status === "complete";
+                          
+                          return (
+                            <div key={index} className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
+                                isCompleted ? "bg-green-500 text-white" :
+                                isActive ? "bg-primary text-white" :
+                                "bg-slate-200 text-slate-600"
+                              }`}>
+                                {isCompleted ? "✓" : index + 1}
+                              </div>
+                              <div className="flex-1">
+                                <p className={`text-sm font-medium ${
+                                  isCompleted ? "text-green-700" : 
+                                  isActive ? "text-slate-900" : 
+                                  "text-slate-500"
+                                }`}>
+                                  {milestone.label}
+                                </p>
+                                <p className="text-xs text-slate-500">{milestone.projectedDate}</p>
+                              </div>
+                              {isActive && (
+                                <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full font-medium">
+                                  {milestone.status === "current" ? "Current" : "Next"}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action buttons */}
+                  <div className="flex gap-3">
+                    <button
+                      className="flex-1 bg-primary py-3 px-4 rounded-xl font-semibold text-white active:scale-[0.97] transition-transform"
+                      onClick={() => setStepIndex(stepIndex + 1)}
+                    >
+                      I understand this plan
+                    </button>
+                    <button
+                      className="px-4 py-3 rounded-xl border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 transition-colors"
+                      onClick={() => {
+                        // Toggle details view
+                        setShowDetails(!showDetails);
+                      }}
+                    >
+                      {showDetails ? "Hide" : "Show"} details
+                    </button>
                   </div>
-                </section>
+                </div>
 
-                <section className="mb-12 bg-white p-6 rounded-2xl border border-slate-100 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-1.5 h-full bg-primary" />
-                  <h3 className="text-2xl mb-2">What delayed contributions could cost you</h3>
-                  <p className="text-slate-700 text-sm">{opportunityPlainLanguage}</p>
-                  <p className="text-slate-900 font-semibold mt-3">Estimated 10-year gap: {formatCurrency(opportunity10yr)}</p>
-                </section>
-
-                {/* Layer 3: Donut chart */}
-                <section className="mt-16">
-                  <div className="mb-8">
-                    <h3 className="text-3xl mb-2">4-Bucket Allocation</h3>
-                    <p className="text-slate-500 text-base font-light">Layer 3 of 3. Full detail for your cash flow and next-level progress.</p>
-                  </div>
-
-                  <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 flex flex-col items-center">
-                    <div className="relative w-64 h-64 mb-10 flex items-center justify-center">
-                      <svg className="w-full h-full" viewBox="0 0 100 100" style={{ transform: "rotate(-90deg)" }}>
-                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#E5E7EB" strokeWidth="12" />
-                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#C8A15B" strokeWidth="12" strokeDasharray="251.2" strokeDashoffset="150" strokeLinecap="round" />
-                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#1A1A1A" strokeWidth="12" strokeDasharray="251.2" strokeDashoffset="200" strokeLinecap="round" transform="rotate(90 50 50)" />
-                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#94A3B8" strokeWidth="12" strokeDasharray="251.2" strokeDashoffset="220" strokeLinecap="round" transform="rotate(200 50 50)" />
-                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#D1D5DB" strokeWidth="12" strokeDasharray="251.2" strokeDashoffset="240" strokeLinecap="round" transform="rotate(280 50 50)" />
-                      </svg>
-                      <div className="absolute flex flex-col items-center">
-                        <span className="text-xs uppercase tracking-tighter text-slate-400 font-semibold">Total Capital</span>
-                        <span className="text-2xl font-bold">{formatCurrency(Number(effectivePlan?.snapshot?.monthlyIncome || snapshot.takeHomeMonthly))}</span>
+                {/* Expandable details */}
+                {showDetails && (
+                  <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 space-y-6">
+                    {/* 4-Bucket allocation */}
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3">4-Bucket Allocation</h3>
+                      <div className="space-y-2">
+                        {[
+                          { label: "Fixed Costs", key: "fixed", color: "bg-slate-500" },
+                          { label: "Savings", key: "savings", color: "bg-blue-500" },
+                          { label: "Investments", key: "investments", color: "bg-green-500" },
+                          { label: "Guilt-Free", key: "guiltFree", color: "bg-purple-500" },
+                        ].map((bucket) => (
+                          <div key={bucket.key} className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-3 h-3 rounded-full ${bucket.color}`} />
+                              <span className="text-sm text-slate-700">{bucket.label}</span>
+                            </div>
+                            <span className="text-sm font-medium text-slate-900">
+                              {formatCurrency(Number(currentBucketValues[bucket.key] || 0))} ({bucketPercentages[bucket.key]}%)
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-6 w-full">
-                      {bucketColors.map((bucket) => (
-                        <div key={bucket.key} className="flex items-center gap-3">
-                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: bucket.color }} />
-                          <div>
-                            <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">{bucket.label}</p>
-                            <p className="text-lg font-medium">{bucketPercentages[bucket.key]}% ({formatCurrency(Number(currentBucketValues[bucket.key] || 0))})</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    {/* Opportunity cost */}
+                    {effectivePlan?.opportunityCost && (
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3">Opportunity Cost</h3>
+                        <p className="text-sm text-slate-600">{effectivePlan.opportunityCost}</p>
+                      </div>
+                    )}
+
+                    {/* Assumptions */}
+                    {effectivePlan?.assumptions && (
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3">Assumptions</h3>
+                        <ul className="space-y-1">
+                          {effectivePlan.assumptions.map((assumption, index) => (
+                            <li key={index} className="text-sm text-slate-600">• {assumption}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
-                </section>
-
-                <section className="mt-8 bg-white p-6 rounded-2xl border border-slate-100">
-                  <h3 className="text-xl font-semibold mb-4">Your milestones</h3>
-                  <ul className="space-y-3">
-                    {milestoneRows.map((milestone, index) => (
-                      <li key={`${milestone.label}-${index}`} className="border border-slate-100 rounded-xl p-4">
-                        <p className="font-semibold">{milestone.label}</p>
-                        <p className="text-sm text-slate-500">{milestone.projectedDate}</p>
-                        <p className="text-sm text-slate-700 mt-1">{milestone.celebrationMessage}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-
-                {bookRecommendation && (
-                  <section className="mt-8 bg-white p-6 rounded-2xl border border-slate-100">
-                    <h3 className="text-xl font-semibold mb-2">Recommended read</h3>
-                    <p className="text-sm text-slate-900 font-medium">{bookRecommendation.title} by {bookRecommendation.author}</p>
-                    <p className="text-sm text-slate-600 mt-1">{bookRecommendation.hook}</p>
-                  </section>
                 )}
-
-                <section className="mt-8 bg-white p-6 rounded-2xl border border-slate-100">
-                  <h3 className="text-xl font-semibold mb-2">This week&apos;s action</h3>
-                  <p className="text-sm text-slate-700">{weeklyAction}</p>
-                </section>
-
-                {/* Detail and assumptions */}
-                <section className="mt-8 bg-white p-6 rounded-2xl border border-slate-100">
-                  <h3 className="text-xl font-semibold mb-4">Detail and assumptions</h3>
-                  <div className="space-y-2 text-sm text-slate-600">
-                    <p>Debt roadmap: debt-free target is {debtFreeDateLabel}.</p>
-                    <p>Emergency fund target: {Number(effectivePlan?.emergencyFund?.targetMonths || 3)} months.</p>
-                    <p>Financial level: Level {Number(effectivePlan?.financialLevel?.current || plan.level.level)} ({effectivePlan?.financialLevel?.label || plan.level.name}).</p>
-                    <ul className="list-disc pl-5 space-y-1 mt-3">
-                      {assumptions.map((assumption) => (
-                        <li key={assumption}>{assumption}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </section>
-
-                <div className="mt-12">
-                  <button
-                    className="w-full btn-secondary py-5 text-lg rounded-2xl"
-                    onClick={() => setStepIndex(stepIndex + 1)}
-                  >
-                    Review and confirm my decisions
-                  </button>
-                  <p className="text-center text-slate-400 text-xs mt-4 leading-relaxed px-8">
-                    This plan does not execute transactions. You choose each action and complete it yourself.
-                  </p>
-                </div>
               </div>
+            )}
+
+            {/* Floating agent chat button */}
+            {currentStep === "plan" && (
+              <button
+                className="fixed bottom-6 right-6 w-14 h-14 bg-primary rounded-full shadow-lg flex items-center justify-center text-white hover:bg-primary/90 active:scale-95 transition-all z-50"
+                onClick={() => {
+                  // Open chat modal or navigate to chat
+                  setStepIndex(FLOW.indexOf("intake"));
+                  // You could also open a modal here instead
+                }}
+              >
+                <span className="material-symbols-outlined text-2xl">chat</span>
+              </button>
             )}
 
             {/* ─── COMPREHENSION (screen8) ─── */}
