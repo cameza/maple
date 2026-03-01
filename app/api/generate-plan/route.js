@@ -36,6 +36,7 @@ function buildUiPlanShape(profile, metrics, agentPlan) {
   const milestones = Array.isArray(agentPlan?.milestones)
     ? agentPlan.milestones.map((item, index) => ({
       label: item?.title || `Milestone ${index + 1}`,
+      status: item?.status || "locked",
       projectedDate: item?.estimatedCompletionDate || timelineToMonthLabel(item?.estimatedTimeline, index + 1),
       celebrationMessage: item?.unlocksWhen || item?.whyThisOrder || "Progress unlocked.",
     }))
@@ -53,6 +54,12 @@ function buildUiPlanShape(profile, metrics, agentPlan) {
     }));
 
   return {
+    goal: agentPlan?.goal || "Build a stable financial plan",
+    goalReadiness: agentPlan?.goalReadiness || {
+      canAchieveNow: true,
+      message: "Here's your personalized path forward.",
+      reasoning: "Your plan prioritizes financial stability while working toward your goal."
+    },
     financialLevel: {
       current: asNumber(agentPlan?.financialLevel, 1),
       label: agentPlan?.financialLevelLabel || "Foundation",

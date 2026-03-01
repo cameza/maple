@@ -149,9 +149,37 @@ export function buildFallbackAgentPlan(profile, metrics) {
   const investmentAmount = starterFundGap > 0 ? 0 : Math.max(0, Math.round(monthlyIncome * 0.1));
   const guiltFree = Math.max(0, Math.round(monthlyIncome - fixed - savingsAmount - debtAmount - investmentAmount));
 
-  // Create goal-aware coach opening
+  // Create goal-aware coach opening and readiness assessment
   const userGoal = profile.goal || "Build a stable financial plan";
-  const goalContext = userGoal.toLowerCase().includes("home") || profile.isFirstTimeBuyer
+  const isHomeBuyingGoal = userGoal.toLowerCase().includes("home") || profile.isFirstTimeBuyer;
+  const isReadyForGoal = starterFundGap === 0 && metrics.debtBalance === 0;
+  
+  let goalReadiness;
+  if (isHomeBuyingGoal) {
+    if (isReadyForGoal) {
+      goalReadiness = {
+        canAchieveNow: true,
+        message: "Yes - you have the stability to start saving for a home.",
+        reasoning: "With your emergency fund established and no high-interest debt, you can focus on building your down payment through FHSA and TFSA."
+      };
+    } else {
+      goalReadiness = {
+        canAchieveNow: false,
+        message: "Not yet - focus on building stability first.",
+        reasoning: starterFundGap > 0 
+          ? "Before saving for a home, build a starter emergency fund to protect against setbacks that could derail your progress."
+          : "Before saving for a home, eliminate high-interest debt to free up cash flow and avoid paying more in interest than you earn in savings."
+      };
+    }
+  } else {
+    goalReadiness = {
+      canAchieveNow: true,
+      message: "Here's your personalized path forward.",
+      reasoning: "Your plan prioritizes financial stability while working toward your goal."
+    };
+  }
+  
+  const goalContext = isHomeBuyingGoal && !isReadyForGoal
     ? `Your goal is ${userGoal.toLowerCase()}. To get there, you need stability first.`
     : `Your goal is ${userGoal.toLowerCase()}.`;
 
@@ -206,6 +234,8 @@ export function buildFallbackAgentPlan(profile, metrics) {
   return {
     financialLevel: level.level,
     financialLevelLabel: level.label,
+    goal: userGoal,
+    goalReadiness,
     coachOpening: starterFundGap > 0
       ? `${goalContext} Your current risk is low cash protection. Before aggressive debt or investing moves, your first win is a starter emergency buffer so surprises stop derailing progress.`
       : `${goalContext} Your baseline is stable enough to sequence debt and account contributions in a coaching order that protects momentum.`,

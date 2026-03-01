@@ -273,11 +273,19 @@ export default function PlannerPage() {
         return;
       }
 
+      // Allow progression if debts are already in the list
+      if (debtsList.length > 0) {
+        setCollectedData((prev) => mergeCollectedData(prev, { debts: debtsList }));
+        goToNextIntakePhase();
+        return;
+      }
+
+      // If no debts in list, validate current form
       const balance = toNumber(debtForm.balance);
       const interestRate = toNumber(debtForm.interestRate);
       const minimumPayment = toNumber(debtForm.minimumPayment);
       if (!debtForm.name.trim() || balance === null || interestRate === null || minimumPayment === null || balance < 0 || interestRate < 0 || minimumPayment < 0) {
-        setIntakeValidationError("Add debt name, balance, APR, and minimum payment to continue.");
+        setIntakeValidationError("Add at least one debt to continue, or select 'No debt'.");
         return;
       }
 
@@ -1277,6 +1285,41 @@ export default function PlannerPage() {
 
                 {/* Single plan card */}
                 <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-6">
+                  {/* Your Goal Section */}
+                  {effectivePlan?.goal && effectivePlan?.goalReadiness && (
+                    <div className="mb-6 pb-6 border-b border-slate-100">
+                      <p className="text-xs uppercase tracking-widest text-slate-400 font-semibold mb-2">Your Goal</p>
+                      <h2 className="text-xl font-bold text-slate-900 mb-3">{effectivePlan.goal}</h2>
+                      
+                      <div className="bg-slate-50 rounded-lg p-4">
+                        <div className="flex items-start gap-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                            effectivePlan.goalReadiness.canAchieveNow ? 'bg-green-100' : 'bg-amber-100'
+                          }`}>
+                            <span className={`material-symbols-outlined text-xl ${
+                              effectivePlan.goalReadiness.canAchieveNow ? 'text-green-700' : 'text-amber-700'
+                            }`}>
+                              {effectivePlan.goalReadiness.canAchieveNow ? 'check_circle' : 'schedule'}
+                            </span>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-slate-900 mb-1">
+                              Can we help you achieve this now?
+                            </p>
+                            <p className={`text-sm font-medium mb-2 ${
+                              effectivePlan.goalReadiness.canAchieveNow ? 'text-green-700' : 'text-amber-700'
+                            }`}>
+                              {effectivePlan.goalReadiness.message}
+                            </p>
+                            <p className="text-xs text-slate-600 leading-relaxed">
+                              {effectivePlan.goalReadiness.reasoning}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Financial level */}
                   <div className="mb-6 pb-4 border-b border-slate-100">
                     <div className="flex items-center justify-between">
