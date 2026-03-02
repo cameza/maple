@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maple | Your Financial AI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap"
+        rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paper: '#FDFCF9',
+                        ink: '#1A1C19',
+                        sand: '#F4F2E9',
+                        stone: {
+                            100: '#F2EFEB',
+                            200: '#E6E2D8',
+                            300: '#D5CFC3',
+                            400: '#A39C93',
+                            500: '#7A756C',
+                            600: '#54504A',
+                        },
+                        gold: '#C69F60'
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+                        sans: ['"Inter"', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-paper text-ink font-sans antialiased selection:bg-stone-200 selection:text-ink">
+
+    <section class="min-h-screen flex flex-col justify-center px-6 py-24 sm:px-12 lg:px-24">
+        <div class="max-w-6xl mx-auto w-full">
+            <h1 class="font-serif text-5xl sm:text-7xl lg:text-[5.5rem] leading-[1.05] tracking-tight">
+                Financial literacy is one of the most <span class="italic text-stone-500">underutilized levers</span>
+                for improving the quality of life of Canadians.
+            </h1>
+
+            <div class="mt-16 sm:mt-24 max-w-2xl ml-auto border-l border-stone-300 pl-8">
+                <p class="text-xl sm:text-2xl font-sans font-light text-stone-600 leading-relaxed">
+                    People who understand their money make better decisions—about debt, retirement, housing—and that
+                    <span class="font-medium text-ink">compounds over a lifetime.</span>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section
+        class="min-h-screen flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-24 bg-white border-y border-stone-100">
+        <div class="max-w-6xl mx-auto w-full">
+            <div class="mb-8 md:mb-12">
+                <h2 class="font-serif text-4xl sm:text-5xl text-ink mb-2 tracking-tight">Meet Maple.</h2>
+                <p class="text-lg font-sans font-light text-stone-500">Your Financial Planning AI Agent.</p>
+            </div>
+
+            <!-- Main Diagram Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-y-6 lg:gap-y-6 items-center relative">
+
+                <!-- 1. The Brain (Top Row) -->
+                <div class="lg:col-start-4 lg:col-span-6 lg:row-start-1 flex justify-center order-1">
+                    <div class="w-full max-w-sm">
+                        <div
+                            class="bg-paper/80 backdrop-blur-sm p-4 rounded-xl border-l-4 border-gold border border-stone-100 shadow-sm flex items-center justify-center gap-4 transition-transform hover:-translate-y-1 duration-300">
+                            <span class="text-[10px] uppercase tracking-[0.2em] text-gold font-bold">The Brain</span>
+                            <div class="h-8 w-px bg-stone-200"></div>
+                            <h3 class="font-sans text-sm font-medium tracking-wide">OpenAI GPT 4.0 Model</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Context Bucket (Left Side, Middle Row) -->
+                <div class="lg:col-start-1 lg:col-span-3 lg:row-start-2 order-3 lg:order-2">
+                    <div class="border-2 border-dashed border-stone-200 rounded-[2rem] p-4 bg-stone-50/30 relative">
+                        <span
+                            class="absolute -top-3 left-6 bg-paper px-3 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold">Context</span>
+                        <div class="flex flex-col gap-3">
+                            <div
+                                class="bg-paper p-4 rounded-xl border border-stone-200 shadow-sm transition-transform hover:-translate-x-1 duration-300">
+                                <h4 class="font-serif text-lg text-ink mb-1">User Inputs</h4>
+                                <p class="text-xs text-stone-500 font-sans font-light">Direct preferences and financial
+                                    goals from the user.</p>
+                            </div>
+                            <div
+                                class="bg-paper p-4 rounded-xl border border-stone-200 shadow-sm transition-transform hover:-translate-x-1 duration-300">
+                                <h4 class="font-serif text-lg text-ink mb-1">Knowledge Base</h4>
+                                <p class="text-xs text-stone-500 font-sans font-light">Foundational financial data
+                                    forming the reality of their life.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. AI Agent (Center, Middle Row) -->
+                <div class="lg:col-start-4 lg:col-span-6 lg:row-start-2 order-2 lg:order-3">
+                    <div
+                        class="w-full bg-ink text-paper p-8 sm:p-10 rounded-[2.5rem] shadow-2xl flex flex-col justify-center items-center text-center relative overflow-hidden group border-2 border-gold/30">
+                        <div
+                            class="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        </div>
+                        <span
+                            class="text-[10px] uppercase tracking-[0.3em] text-stone-400 font-bold mb-4 block relative z-10">Central
+                            Intelligence</span>
+                        <h1 class="font-serif text-5xl sm:text-6xl mb-3 tracking-tighter text-gold relative z-10">
+                            AI Agent</h1>
+                        <div class="w-16 h-px bg-gold/40 mb-6 relative z-10"></div>
+                        <p
+                            class="text-sm text-stone-400 font-sans font-light leading-relaxed max-w-[280px] relative z-10">
+                            Synthesizes context and applies tools across your financial lifecycle.</p>
+                    </div>
+                </div>
+
+                <!-- 4. Output Card (Right Side, Middle Row) -->
+                <div class="lg:col-start-10 lg:col-span-3 lg:row-start-2 order-5 lg:order-4">
+                    <div
+                        class="bg-sand p-6 sm:p-8 rounded-[2rem] border border-stone-200 shadow-lg flex flex-col justify-center transition-transform hover:translate-x-1 duration-300">
+                        <span
+                            class="text-[10px] uppercase tracking-[0.2em] text-stone-500 font-bold mb-3 block">Output</span>
+                        <h3 class="font-serif text-3xl text-ink mb-3 tracking-tight">Tailored Plan</h3>
+                        <p class="text-xs text-stone-600 font-sans font-light leading-relaxed">A bespoke, highly
+                            actionable roadmap built specifically for the user's life goals.</p>
+                    </div>
+                </div>
+
+                <!-- 5. Tools Bucket (Bottom Row) -->
+                <div class="lg:col-start-4 lg:col-span-6 lg:row-start-3 order-4 lg:order-5">
+                    <div
+                        class="w-full border-2 border-dashed border-stone-200 rounded-[2.5rem] p-4 bg-stone-50/30 relative">
+                        <span
+                            class="absolute -top-3 left-6 bg-paper px-3 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold">Tools</span>
+                        <div class="flex flex-col gap-3">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div
+                                    class="bg-paper p-3 rounded-xl border border-stone-200 shadow-sm transition-transform hover:translate-y-1 duration-300 text-center">
+                                    <h4 class="font-serif text-base text-ink">Prompt Templates</h4>
+                                </div>
+                                <div
+                                    class="bg-paper p-3 rounded-xl border border-stone-200 shadow-sm transition-transform hover:translate-y-1 duration-300 text-center">
+                                    <h4 class="font-serif text-base text-ink">Expert Rules</h4>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-paper p-3 rounded-xl border border-stone-200 shadow-sm transition-transform hover:translate-y-1 duration-300 text-center">
+                                <h4 class="font-serif text-base text-ink">Coaching Frameworks</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="min-h-screen flex items-center justify-center px-6 py-24 sm:px-12 lg:px-24">
+        <div class="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-center">
+
+            <div class="lg:col-span-7 order-2 lg:order-1">
+                <p class="text-2xl sm:text-3xl lg:text-4xl font-serif text-ink leading-[1.4] tracking-tight">
+                    Maya is not irresponsible. She's doing what most Canadians do—she has a goal, she's saving toward
+                    it, and <span class="italic text-stone-500">she doesn't know what she doesn't know.</span>
+                </p>
+            </div>
+
+            <div class="lg:col-span-5 order-1 lg:order-2">
+                <div
+                    class="bg-white p-10 sm:p-12 rounded-[2.5rem] border border-stone-200 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] relative overflow-hidden">
+
+                    <div class="w-24 h-24 rounded-full bg-stone-200 mb-8 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200&h=200"
+                            alt="Maya" class="w-full h-full object-cover grayscale mix-blend-multiply opacity-90" />
+                        <div class="absolute inset-0 bg-sand mix-blend-color opacity-50"></div>
+                    </div>
+
+                    <h3 class="font-serif text-4xl text-ink mb-2 tracking-tight">Meet Maya.</h3>
+                    <p class="font-sans text-stone-500 text-lg font-light mb-8">31 years old • Toronto, ON</p>
+
+                    <div class="pt-8 border-t border-stone-100">
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold mb-3 block">Primary
+                            Goal</span>
+                        <p class="font-serif text-2xl text-ink leading-snug">Buy her first home in the next 3 to 4
+                            years.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</body>
+
+</html>

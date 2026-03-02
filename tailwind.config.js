@@ -18,6 +18,19 @@ module.exports = {
         accent: "#FFD500",
         "text-main": "#1a1a1a",
         "text-muted": "#6b6b6b",
+        // Landing page colors
+        paper: '#FDFCF9',
+        ink: '#1A1C19',
+        sand: '#F4F2E9',
+        stone: {
+          100: '#F2EFEB',
+          200: '#E6E2D8',
+          300: '#D5CFC3',
+          400: '#A39C93',
+          500: '#7A756C',
+          600: '#54504A',
+        },
+        gold: '#C69F60',
       },
       fontFamily: {
         display: ["Manrope", "sans-serif"],

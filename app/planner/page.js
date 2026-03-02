@@ -18,7 +18,6 @@ const FLOW = [
   "intake",
   "reasoning",
   "plan",
-  "comprehension",
   "confirmation",
   "checkin",
 ];
@@ -80,7 +79,6 @@ export default function PlannerPage() {
   const [intakeStarted, setIntakeStarted] = useState(false);
   const [monthlyIncome, setMonthlyIncome] = useState(6200);
   const [reasoningTick, setReasoningTick] = useState(0);
-  const [answers, setAnswers] = useState({ q1: "", q2: "", q3: "" });
   const [confirmed, setConfirmed] = useState(false);
   const [changeType, setChangeType] = useState("income_up");
   const [messages, setMessages] = useState([]);
@@ -101,6 +99,10 @@ export default function PlannerPage() {
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const [generationError, setGenerationError] = useState("");
   const [intakeValidationError, setIntakeValidationError] = useState("");
+  const [showDetails, setShowDetails] = useState(false);
+  const [showResponsibilityModal, setShowResponsibilityModal] = useState(false);
+  const [responsibilityAccepted, setResponsibilityAccepted] = useState(false);
+  const [expandedActions, setExpandedActions] = useState(new Set());
   const [profileForm, setProfileForm] = useState({ goal: "", age: "", province: "", firstTimeBuyer: "" });
   const [incomeForm, setIncomeForm] = useState({ monthlyIncome: "", incomeStability: "" });
   const [expensesForm, setExpensesForm] = useState({
@@ -112,6 +114,7 @@ export default function PlannerPage() {
     discretionary: "",
   });
   const [debtForm, setDebtForm] = useState({ hasDebts: "yes", name: "", balance: "", interestRate: "", minimumPayment: "" });
+  const [debtsList, setDebtsList] = useState([]);
   const [accountsForm, setAccountsForm] = useState({
     tfsaHas: "",
     tfsaBalance: "",
@@ -141,6 +144,18 @@ export default function PlannerPage() {
   const completedPhases = completedPhasesByKey[currentPhase] ?? 0;
   const phaseProgress = Math.max(1, Math.min(completedPhases + 1, INTAKE_TABS.length));
   const intakePct = Math.round((completedPhases / 6) * 100);
+
+  const toggleActionExpansion = (index) => {
+    setExpandedActions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
 
   const snapshot = useMemo(() => buildSnapshot({ planType, monthlyIncome }), [planType, monthlyIncome]);
   const plan = useMemo(() => generatePlan(snapshot), [snapshot]);
@@ -182,6 +197,19 @@ export default function PlannerPage() {
   const weeklyAction = effectivePlan?.oneActionThisWeek || "Pick one transfer amount you can sustain and schedule it this week.";
   const bookRecommendation = effectivePlan?.bookRecommendation || null;
   const currentPhasePosition = Math.max(0, PHASE_ORDER.indexOf(currentPhase));
+  const goalDisplay = (effectivePlan?.goal || collectedData?.profile?.goal || "Build a stable financial plan").trim();
+  const goalReadiness = {
+    canAchieveNow: Boolean(effectivePlan?.goalReadiness?.canAchieveNow),
+    headline: effectivePlan?.goalReadiness?.headline || effectivePlan?.goalReadiness?.message || "No readiness assessment available yet.",
+    reason: effectivePlan?.goalReadiness?.reason || effectivePlan?.goalReadiness?.reasoning || "Generate your plan to see the sequence.",
+    focusNow: effectivePlan?.goalReadiness?.focusNow || "Focus now: complete your first action and keep momentum.",
+  };
+  const levelFramework = [
+    { id: 1, label: "Foundation", description: "Build a starter buffer and control high-interest debt." },
+    { id: 2, label: "Stability", description: "Complete emergency reserves and keep contributions consistent." },
+    { id: 3, label: "Growth", description: "Prioritize registered account growth and long-term goals." },
+  ];
+  const currentLevel = Number(effectivePlan?.financialLevel?.current || 1);
 
   const toNumber = (value) => {
     const parsed = Number(value);
@@ -258,25 +286,34 @@ export default function PlannerPage() {
         return;
       }
 
+      // Allow progression if debts are already in the list
+      if (debtsList.length > 0) {
+        setCollectedData((prev) => mergeCollectedData(prev, { debts: debtsList }));
+        goToNextIntakePhase();
+        return;
+      }
+
+      // If no debts in list, validate current form
       const balance = toNumber(debtForm.balance);
       const interestRate = toNumber(debtForm.interestRate);
       const minimumPayment = toNumber(debtForm.minimumPayment);
       if (!debtForm.name.trim() || balance === null || interestRate === null || minimumPayment === null || balance < 0 || interestRate < 0 || minimumPayment < 0) {
-        setIntakeValidationError("Add debt name, balance, APR, and minimum payment to continue.");
+        setIntakeValidationError("Add at least one debt to continue, or select 'No debt'.");
         return;
       }
 
-      setCollectedData((prev) => mergeCollectedData(prev, {
-        debts: [
-          {
-            name: debtForm.name.trim(),
-            balance,
-            interestRate,
-            minimumPayment,
-          },
-        ],
-      }));
-      goToNextIntakePhase();
+      const newDebt = {
+        name: debtForm.name.trim(),
+        balance,
+        interestRate,
+        minimumPayment,
+      };
+
+      const updatedDebtsList = [...debtsList, newDebt];
+      setDebtsList(updatedDebtsList);
+
+      setDebtForm({ hasDebts: "yes", name: "", balance: "", interestRate: "", minimumPayment: "" });
+      setIntakeValidationError("");
       return;
     }
 
@@ -318,6 +355,18 @@ export default function PlannerPage() {
           fhsa: { hasAccount: accountsForm.fhsaHas === "yes", balance: parsed.fhsaBalance, roomAvailable: parsed.fhsaRoom },
         },
       }));
+
+      // Educational message for first-time buyers who haven't opened FHSA
+      if (accountsForm.fhsaHas === "no" && profileForm.firstTimeBuyer === "yes") {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: "I noticed you haven't opened an FHSA yet. The First Home Savings Account lets first-time buyers contribute up to $8,000/year tax-free toward a down payment, and contributions are tax-deductible. Room only starts building once the account is open, so every year without one means $8,000 in lost room. I'll include opening an FHSA as a priority action in your plan. You can learn more here: /learn?topic=fhsa",
+          },
+        ]);
+      }
+
       goToNextIntakePhase();
       return;
     }
@@ -331,6 +380,7 @@ export default function PlannerPage() {
       }
 
       setCollectedData((prev) => mergeCollectedData(prev, {
+        debts: debtsList,
         emergencyFundAmount,
         currentMonthlySavings,
       }));
@@ -544,16 +594,20 @@ export default function PlannerPage() {
     }
   }, [collectedData, currentPhase, currentStep]);
 
-  const comprehensionScore = Object.values(answers).filter((value) => value === "correct").length;
-  const totalAnswered = Object.values(answers).filter(Boolean).length;
-  const comprehensionReady = totalAnswered === 3 && comprehensionScore >= 2;
-
   const bucketColors = [
     { key: "fixed", color: "#C8A15B", label: "Fixed" },
     { key: "investments", color: "#1A1A1A", label: "Investments" },
     { key: "savings", color: "#94A3B8", label: "Savings" },
     { key: "guiltFree", color: "#D1D5DB", label: "Guilt-Free" },
   ];
+
+  const convertUrlsToLinks = (text) => {
+    // Convert /learn?topic=* patterns to clickable links
+    return text.replace(
+      /\/learn\?topic=([a-zA-Z-]+)/g,
+      '<a href="/learn?topic=$1" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2 hover:text-amber-700 transition-colors cursor-pointer">/learn?topic=$1</a>'
+    );
+  };
 
   const renderChatMessageContent = (message) => {
     if (message.role === "user") {
@@ -577,7 +631,12 @@ export default function PlannerPage() {
         );
 
       if (!hasStructuredFields) {
-        return <p className="text-sm whitespace-pre-wrap">{message.content}</p>;
+        return (
+          <p 
+            className="text-sm whitespace-pre-wrap"
+            dangerouslySetInnerHTML={{ __html: convertUrlsToLinks(message.content) }}
+          />
+        );
       }
 
       return (
@@ -701,12 +760,17 @@ export default function PlannerPage() {
         </div>
       );
     } catch {
-      return <p className="text-sm whitespace-pre-wrap">{message.content}</p>;
+      return (
+        <p 
+          className="text-sm whitespace-pre-wrap"
+          dangerouslySetInnerHTML={{ __html: convertUrlsToLinks(message.content) }}
+        />
+      );
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background-light text-slate-900">
+    <div className="min-h-screen flex flex-col bg-background-light text-slate-900" style={{fontFamily: 'Manrope, sans-serif'}}>
       {/* Reasoning step is full-screen dark, no header/nav */}
       {currentStep === "reasoning" ? (
         <div className="min-h-screen flex flex-col items-center justify-center px-8 text-center" style={{ backgroundColor: "#221d10" }}>
@@ -802,7 +866,7 @@ export default function PlannerPage() {
             </header>
           )}
 
-          <main className="flex-1 max-w-md mx-auto w-full px-6 pb-24">
+          <main className="flex-1 w-full px-4 pb-24">
 
             {/* ─── CHECKLIST (screen3) ─── */}
             {currentStep === "checklist" && (
@@ -817,7 +881,7 @@ export default function PlannerPage() {
                   <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#C5A059" }}>
                     Financial Planning Agent
                   </span>
-                  <h1 className="text-2xl font-bold mt-2 text-slate-900">
+                  <h1 className="text-xl font-bold mt-2 text-slate-900">
                     Your personalized Canadian financial plan
                   </h1>
                   <p className="text-sm text-slate-500 mt-2 leading-relaxed">
@@ -857,29 +921,24 @@ export default function PlannerPage() {
                 </div>
 
                 <header className="mb-8">
-                  <div className="flex justify-between items-center mb-6">
-                    <span className="text-xs font-bold tracking-[0.2em] uppercase opacity-60">Before you start</span>
-                    <button className="p-2 -mr-2">
-                      <span className="material-symbols-outlined">close</span>
-                    </button>
-                  </div>
-                  <h2 className="text-2xl font-semibold leading-tight tracking-tight mb-3">
+                  <span className="text-xs font-bold tracking-[0.2em] uppercase opacity-60">Before you start</span>
+                  <h2 className="text-xl font-semibold leading-tight tracking-tight mb-3">
                     Have these handy
                   </h2>
-                  <p className="text-base opacity-70 leading-relaxed font-light">
+                  <p className="text-sm opacity-70 leading-relaxed">
                     To give you the most accurate plan, it helps to have these items ready before we start.
                   </p>
                 </header>
 
                 <div className="flex-grow space-y-4">
                   {CHECKLIST_ITEMS.map((item) => (
-                    <label key={item.label} className="group flex items-center p-5 bg-white rounded-2xl border border-black/5 ios-shadow active:scale-[0.98] transition-all cursor-pointer">
+                    <label key={item.label} className="group flex items-center p-4 bg-white rounded-xl border border-slate-100 ios-shadow active:scale-[0.98] transition-all cursor-pointer">
                       <div className="relative flex items-center justify-center">
                         <input type="checkbox" className="peer h-6 w-6 border-2 border-primary/20 rounded-full bg-transparent checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0 transition-colors" />
                         <span className="material-symbols-outlined absolute text-white text-sm opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none">check</span>
                       </div>
                       <div className="ml-4">
-                        <h3 className="font-medium text-[17px]">{item.label}</h3>
+                        <h3 className="font-semibold text-base">{item.label}</h3>
                         <p className="text-sm opacity-50">{item.sub}</p>
                       </div>
                     </label>
@@ -907,7 +966,7 @@ export default function PlannerPage() {
               <div className="min-h-[80vh] flex flex-col pt-12 pb-10">
                 <header className="mb-10">
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Before intake</p>
-                  <h1 className="text-4xl leading-tight font-semibold mt-3">Who is this plan for?</h1>
+                  <h1 className="text-2xl leading-tight font-semibold mt-3">Who is this plan for?</h1>
                   <p className="text-slate-600 mt-4 leading-relaxed">
                     Choose a plan type first. This changes account sequencing and action priorities.
                   </p>
@@ -915,7 +974,7 @@ export default function PlannerPage() {
 
                 <div className="space-y-4 flex-1">
                   <button
-                    className={`w-full text-left p-6 rounded-2xl bg-white shadow-sm transition-all ${
+                    className={`w-full text-left p-4 rounded-xl bg-white shadow-sm transition-all ${
                       planType === "individual" ? "border-2 border-primary" : "border border-slate-200"
                     }`}
                     onClick={() => setPlanType("individual")}
@@ -926,7 +985,7 @@ export default function PlannerPage() {
                   </button>
 
                   <button
-                    className={`w-full text-left p-6 rounded-2xl bg-white transition-all ${
+                    className={`w-full text-left p-4 rounded-xl bg-white transition-all ${
                       planType === "household" ? "border-2 border-primary shadow-sm" : "border border-slate-200"
                     }`}
                     onClick={() => setPlanType("household")}
@@ -991,7 +1050,7 @@ export default function PlannerPage() {
 
                 {/* Intake content */}
                 <div className="flex-1 min-h-0 overflow-y-auto py-5 space-y-5">
-                  <section className="bg-white border border-slate-100 rounded-2xl p-4 space-y-4">
+                  <section className="bg-white border border-slate-100 rounded-xl p-4 space-y-4">
                     <div>
                       <p className="text-[11px] uppercase tracking-widest font-semibold text-slate-400">{PHASE_META[currentPhase]?.label || "Intake"}</p>
                       <h3 className="text-base font-semibold mt-1">Enter this section in one pass</h3>
@@ -1049,12 +1108,64 @@ export default function PlannerPage() {
                           <button type="button" onClick={() => setDebtForm((prev) => ({ ...prev, hasDebts: "yes" }))} className={`rounded-xl border px-3 py-2 text-sm ${debtForm.hasDebts === "yes" ? "border-primary text-primary" : "border-slate-200 text-slate-600"}`}>I have debt</button>
                           <button type="button" onClick={() => setDebtForm((prev) => ({ ...prev, hasDebts: "no" }))} className={`rounded-xl border px-3 py-2 text-sm ${debtForm.hasDebts === "no" ? "border-primary text-primary" : "border-slate-200 text-slate-600"}`}>No debt</button>
                         </div>
+                        
                         {debtForm.hasDebts === "yes" && (
-                          <div className="grid grid-cols-2 gap-2">
-                            <input value={debtForm.name} onChange={(e) => setDebtForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="Debt name" className="col-span-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
-                            <input value={debtForm.balance} onChange={(e) => setDebtForm((prev) => ({ ...prev, balance: e.target.value }))} placeholder="Balance" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
-                            <input value={debtForm.interestRate} onChange={(e) => setDebtForm((prev) => ({ ...prev, interestRate: e.target.value }))} placeholder="APR %" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
-                            <input value={debtForm.minimumPayment} onChange={(e) => setDebtForm((prev) => ({ ...prev, minimumPayment: e.target.value }))} placeholder="Minimum payment" type="number" className="col-span-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                          <>
+                            <div className="grid grid-cols-2 gap-2">
+                              <input value={debtForm.name} onChange={(e) => setDebtForm((prev) => ({ ...prev, name: e.target.value }))} placeholder="Debt name" className="col-span-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                              <input value={debtForm.balance} onChange={(e) => setDebtForm((prev) => ({ ...prev, balance: e.target.value }))} placeholder="Balance" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                              <input value={debtForm.interestRate} onChange={(e) => setDebtForm((prev) => ({ ...prev, interestRate: e.target.value }))} placeholder="APR %" type="number" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                              <input value={debtForm.minimumPayment} onChange={(e) => setDebtForm((prev) => ({ ...prev, minimumPayment: e.target.value }))} placeholder="Minimum payment" type="number" className="col-span-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                            </div>
+                            
+                            <button 
+                              type="button" 
+                              onClick={() => {
+                                const balance = Number(debtForm.balance);
+                                const interestRate = Number(debtForm.interestRate);
+                                const minimumPayment = Number(debtForm.minimumPayment);
+                                
+                                if (!debtForm.name.trim() || isNaN(balance) || isNaN(interestRate) || isNaN(minimumPayment) || balance < 0 || interestRate < 0 || minimumPayment < 0) {
+                                  setIntakeValidationError("Add debt name, balance, APR, and minimum payment to continue.");
+                                  return;
+                                }
+                                
+                                const newDebt = {
+                                  name: debtForm.name.trim(),
+                                  balance,
+                                  interestRate,
+                                  minimumPayment,
+                                };
+                                
+                                setDebtsList(prev => [...prev, newDebt]);
+                                setDebtForm({ hasDebts: "yes", name: "", balance: "", interestRate: "", minimumPayment: "" });
+                                setIntakeValidationError("");
+                              }}
+                              className="w-full bg-slate-100 text-slate-700 rounded-xl px-3 py-2 text-sm font-medium hover:bg-slate-200 transition-colors"
+                            >
+                              Add debt
+                            </button>
+                          </>
+                        )}
+                        
+                        {debtsList.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Debts added ({debtsList.length})</p>
+                            {debtsList.map((debt, index) => (
+                              <div key={index} className="bg-slate-50 rounded-lg p-2 flex justify-between items-center">
+                                <div className="text-sm">
+                                  <span className="font-medium">{debt.name}</span>
+                                  <span className="text-slate-500 ml-2">${debt.balance} @ {debt.interestRate}%</span>
+                                </div>
+                                <button 
+                                  type="button"
+                                  onClick={() => setDebtsList(prev => prev.filter((_, i) => i !== index))}
+                                  className="text-red-500 hover:text-red-700 text-xs"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>
@@ -1100,13 +1211,13 @@ export default function PlannerPage() {
                     <div className="mt-1 mb-3 px-1 py-3 rounded-xl border border-amber-100 bg-amber-50 flex flex-col gap-1.5">
                       <p className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide px-1">Not sure about these accounts? Learn more:</p>
                       <div className="flex gap-2 flex-wrap px-1">
-                        <a href="/learn#tfsa" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">TFSA</a>
+                        <a href="/learn?topic=tfsa" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">TFSA</a>
                         <span className="text-amber-300">·</span>
-                        <a href="/learn#rrsp" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">RRSP</a>
+                        <a href="/learn?topic=rrsp" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">RRSP</a>
                         <span className="text-amber-300">·</span>
-                        <a href="/learn#fhsa" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">FHSA</a>
+                        <a href="/learn?topic=fhsa" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">FHSA</a>
                         <span className="text-amber-300">·</span>
-                        <a href="/learn#account-priority" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">Priority order</a>
+                        <a href="/learn?topic=account-priority" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">Priority order</a>
                       </div>
                     </div>
                   )}
@@ -1204,226 +1315,378 @@ export default function PlannerPage() {
             {/* ─── PLAN (screen6) ─── */}
             {currentStep === "plan" && (
               <div className="pb-10">
-                <div className="mb-10 pt-6">
-                  <h2 className="text-4xl leading-tight mb-3">The 3 Actions</h2>
-                  <p className="text-slate-500 text-lg font-light leading-relaxed">
-                    Layer 1 of 3. Based on your goals and current numbers, these are your highest impact moves for this month.
-                  </p>
-                </div>
+                {/* Single plan card */}
+                <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-6">
+                  {/* Your Goal Section */}
+                  {goalDisplay && (
+                    <div className="mb-6 pb-6 border-b border-slate-100">
+                      <p className="text-xs uppercase tracking-widest text-slate-400 font-semibold mb-2">Your Goal</p>
+                      <h2 className="text-xl font-bold text-slate-900 mb-3">{goalDisplay}</h2>
 
-                {emergencyFundMonths < 1 && (
-                  <section className="mb-8 bg-white p-6 rounded-2xl border border-amber-200">
-                    <h3 className="text-lg font-semibold text-amber-700">Priority alert: Build a starter emergency fund</h3>
-                    <p className="text-sm text-slate-700 mt-2">
-                      You currently have {emergencyFundMonths.toFixed(1)} months of essentials saved. Before investing, build at least 1 month of buffer so one surprise expense does not derail your plan.
-                    </p>
-                  </section>
-                )}
-
-                <div className="space-y-4 mb-12">
-                  {displayedPriorities.map((priority, index) => (
-                    <div key={`${priority.rank}-${priority.action}`} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
-                      {index === 0 && <div className="absolute top-0 left-0 w-1.5 h-full bg-primary" />}
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <span className={`text-[10px] font-bold uppercase tracking-widest mb-1 block ${index === 0 ? "text-primary" : "text-slate-400"}`}>
-                            Priority {String(priority.rank || index + 1).padStart(2, "0")}
-                          </span>
-                          <h3 className="text-xl font-medium leading-snug">{priority.action}</h3>
-                          <p className="text-slate-500 text-sm mt-1">
-                            Suggested monthly amount: {formatCurrency(Number(priority.dollarAmount || 0))}
-                          </p>
-                        </div>
-                        <span className="material-symbols-outlined text-slate-300">expand_more</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <section className="mb-12 bg-white p-6 rounded-2xl border border-slate-100">
-                  <h3 className="text-2xl serif-title">You could be debt-free by {debtFreeDateLabel}</h3>
-                </section>
-
-                {/* Layer 2 */}
-                <section className="mb-12">
-                  <div className="mb-6">
-                    <h3 className="text-3xl mb-2">Why these actions</h3>
-                    <p className="text-slate-500 text-base font-light">Layer 2 of 3. Each action is tied to your numbers.</p>
-                  </div>
-                  <div className="space-y-4">
-                    {displayedPriorities.map((priority, index) => (
-                      <article key={`${priority.rank}-why`} className="bg-white p-5 rounded-2xl border border-slate-100">
-                        <h4 className="font-semibold mb-2">Action {index + 1} reasoning</h4>
-                        <p className="text-sm text-slate-600">{priority.reasoning}</p>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-
-                <section className="mb-12 bg-white p-6 rounded-2xl border border-slate-100 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-1.5 h-full bg-primary" />
-                  <h3 className="text-2xl mb-2">What delayed contributions could cost you</h3>
-                  <p className="text-slate-700 text-sm">{opportunityPlainLanguage}</p>
-                  <p className="text-slate-900 font-semibold mt-3">Estimated 10-year gap: {formatCurrency(opportunity10yr)}</p>
-                </section>
-
-                {/* Layer 3: Donut chart */}
-                <section className="mt-16">
-                  <div className="mb-8">
-                    <h3 className="text-3xl mb-2">4-Bucket Allocation</h3>
-                    <p className="text-slate-500 text-base font-light">Layer 3 of 3. Full detail for your cash flow and next-level progress.</p>
-                  </div>
-
-                  <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 flex flex-col items-center">
-                    <div className="relative w-64 h-64 mb-10 flex items-center justify-center">
-                      <svg className="w-full h-full" viewBox="0 0 100 100" style={{ transform: "rotate(-90deg)" }}>
-                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#E5E7EB" strokeWidth="12" />
-                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#C8A15B" strokeWidth="12" strokeDasharray="251.2" strokeDashoffset="150" strokeLinecap="round" />
-                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#1A1A1A" strokeWidth="12" strokeDasharray="251.2" strokeDashoffset="200" strokeLinecap="round" transform="rotate(90 50 50)" />
-                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#94A3B8" strokeWidth="12" strokeDasharray="251.2" strokeDashoffset="220" strokeLinecap="round" transform="rotate(200 50 50)" />
-                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#D1D5DB" strokeWidth="12" strokeDasharray="251.2" strokeDashoffset="240" strokeLinecap="round" transform="rotate(280 50 50)" />
-                      </svg>
-                      <div className="absolute flex flex-col items-center">
-                        <span className="text-xs uppercase tracking-tighter text-slate-400 font-semibold">Total Capital</span>
-                        <span className="text-2xl font-bold">{formatCurrency(Number(effectivePlan?.snapshot?.monthlyIncome || snapshot.takeHomeMonthly))}</span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-6 w-full">
-                      {bucketColors.map((bucket) => (
-                        <div key={bucket.key} className="flex items-center gap-3">
-                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: bucket.color }} />
-                          <div>
-                            <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">{bucket.label}</p>
-                            <p className="text-lg font-medium">{bucketPercentages[bucket.key]}% ({formatCurrency(Number(currentBucketValues[bucket.key] || 0))})</p>
+                      <div className="bg-slate-50 rounded-lg p-4">
+                        <div className="flex items-start gap-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                            goalReadiness.canAchieveNow ? 'bg-green-100' : 'bg-amber-100'
+                          }`}>
+                            <span className={`material-symbols-outlined text-xl ${
+                              goalReadiness.canAchieveNow ? 'text-green-700' : 'text-amber-700'
+                            }`}>
+                              {goalReadiness.canAchieveNow ? 'check_circle' : 'schedule'}
+                            </span>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-slate-900 mb-1">
+                              Can we help you achieve this now?
+                            </p>
+                            <p className={`text-sm font-medium mb-2 ${
+                              goalReadiness.canAchieveNow ? 'text-green-700' : 'text-amber-700'
+                            }`}>
+                              {goalReadiness.headline}
+                            </p>
+                            <p className="text-xs text-slate-600 leading-relaxed">
+                              {goalReadiness.reason}
+                            </p>
+                            <p className="text-xs text-slate-700 leading-relaxed mt-2 font-medium">
+                              {goalReadiness.focusNow}
+                            </p>
                           </div>
                         </div>
-                      ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Financial level */}
+                  <div className="mb-6 pb-4 border-b border-slate-100">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-xs uppercase tracking-widest text-slate-400 font-semibold">Financial Level Framework</p>
+                      <p className="text-xs text-slate-500">Current: Level {currentLevel}</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {levelFramework.map((levelItem) => {
+                        const isActive = currentLevel === levelItem.id;
+                        return (
+                          <div
+                            key={levelItem.id}
+                            className={`rounded-lg border p-3 ${isActive ? "border-primary bg-primary/5" : "border-slate-200 bg-slate-50"}`}
+                          >
+                            <p className={`text-sm font-semibold ${isActive ? "text-primary" : "text-slate-700"}`}>
+                              Level {levelItem.id}: {levelItem.label}
+                            </p>
+                            <p className="text-xs text-slate-600 mt-1">{levelItem.description}</p>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                </section>
 
-                <section className="mt-8 bg-white p-6 rounded-2xl border border-slate-100">
-                  <h3 className="text-xl font-semibold mb-4">Your milestones</h3>
-                  <ul className="space-y-3">
-                    {milestoneRows.map((milestone, index) => (
-                      <li key={`${milestone.label}-${index}`} className="border border-slate-100 rounded-xl p-4">
-                        <p className="font-semibold">{milestone.label}</p>
-                        <p className="text-sm text-slate-500">{milestone.projectedDate}</p>
-                        <p className="text-sm text-slate-700 mt-1">{milestone.celebrationMessage}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
+                  {/* Actions */}
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold mb-4">Your Actions This Month</h3>
+                    <div className="space-y-3">
+                      {displayedPriorities.map((priority, index) => {
+                        const isExpanded = expandedActions.has(index);
+                        return (
+                          <div key={`${priority.rank}-${priority.action}`} className="bg-slate-50 rounded-lg overflow-hidden">
+                            <div 
+                              className="p-4 relative overflow-hidden cursor-pointer hover:bg-slate-100 transition-colors"
+                              onClick={() => toggleActionExpansion(index)}
+                            >
+                              {index === 0 && <div className="absolute top-0 left-0 w-1 h-full bg-primary" />}
+                              <div className="pl-4">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">
+                                      Priority {String(priority.rank || index + 1).padStart(2, "0")}
+                                    </p>
+                                    <h4 className="font-semibold text-slate-900 mb-2">{priority.action}</h4>
+                                    <p className="text-sm text-slate-600 mb-1">
+                                      {formatCurrency(Number(priority.dollarAmount || 0))}/month for {priority.duration}
+                                    </p>
+                                    {priority.completionDate && priority.completionDate !== "To be calculated" && (
+                                      <p className="text-xs text-slate-500">
+                                        Complete by {priority.completionDate}
+                                      </p>
+                                    )}
+                                    {priority.interestCostPerMonth > 0 && (
+                                      <p className="text-xs text-amber-600 mt-1">
+                                        This debt costs you ~{formatCurrency(priority.interestCostPerMonth)}/month in interest
+                                      </p>
+                                    )}
+                                  </div>
+                                  <span className="material-symbols-outlined text-slate-400 ml-2">
+                                    {isExpanded ? "expand_less" : "expand_more"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
 
-                {bookRecommendation && (
-                  <section className="mt-8 bg-white p-6 rounded-2xl border border-slate-100">
-                    <h3 className="text-xl font-semibold mb-2">Recommended read</h3>
-                    <p className="text-sm text-slate-900 font-medium">{bookRecommendation.title} by {bookRecommendation.author}</p>
-                    <p className="text-sm text-slate-600 mt-1">{bookRecommendation.hook}</p>
-                  </section>
+                            {isExpanded && (
+                              <div className="px-4 pb-4 pl-8 border-t border-slate-200 space-y-3 mt-3">
+                                {priority.reasoning && (
+                                  <p className="text-sm text-slate-600">{priority.reasoning}</p>
+                                )}
+                                {priority.cashFlowUnlocked > 0 && (
+                                  <div className="flex items-start gap-2">
+                                    <span className="material-symbols-outlined text-green-600 text-base mt-0.5">trending_up</span>
+                                    <p className="text-sm text-slate-700">
+                                      When done, you will have {formatCurrency(priority.cashFlowUnlocked)}/month to redirect to your next goal.
+                                    </p>
+                                  </div>
+                                )}
+                                {priority.unlocksLevel && (
+                                  <div className="flex items-start gap-2">
+                                    <span className="material-symbols-outlined text-primary text-base mt-0.5">lock_open</span>
+                                    <p className="text-sm text-slate-700">
+                                      Completing this unlocks Level {priority.unlocksLevel.level}: {priority.unlocksLevel.label}
+                                    </p>
+                                  </div>
+                                )}
+                                {priority.skipImpact && (
+                                  <div className="flex items-start gap-2">
+                                    <span className="material-symbols-outlined text-amber-500 text-base mt-0.5">schedule</span>
+                                    <p className="text-sm text-slate-700">{priority.skipImpact}</p>
+                                  </div>
+                                )}
+                                {priority.learnMoreTopic && (
+                                  <a
+                                    href={`/learn?topic=${priority.learnMoreTopic}`}
+                                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">menu_book</span>
+                                    Learn more about this
+                                  </a>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Goal projection */}
+                  {effectivePlan?.goalProjection && (
+                    <div className="mb-6 bg-green-50 rounded-lg p-4 border border-green-200">
+                      <h3 className="text-lg font-semibold mb-3">{effectivePlan.goalProjection.title || "Projected Savings Pool"}</h3>
+                      <div className="space-y-2">
+                        {(effectivePlan.goalProjection.sources || []).map((source) => (
+                          <div key={source.label} className="flex justify-between text-sm">
+                            <span className="text-slate-600">{source.label}</span>
+                            <span className="font-medium text-slate-900">{formatCurrency(source.amount)}</span>
+                          </div>
+                        ))}
+                        {effectivePlan.goalProjection.totalEstimate > 0 && (
+                          <div className="border-t border-green-200 pt-2 flex justify-between font-semibold">
+                            <span className="text-slate-900">
+                              Estimated total ({effectivePlan.goalProjection.timelineYears}-year horizon)
+                            </span>
+                            <span className="text-green-700">{formatCurrency(effectivePlan.goalProjection.totalEstimate)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Timeline preview */}
+                  {effectivePlan?.milestones && effectivePlan.milestones.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-4">Your Path Forward</h3>
+                      
+                      {/* Visual progress bar */}
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs text-slate-500">Progress to goal</span>
+                          <span className="text-xs text-slate-500">
+                            {effectivePlan.milestones.filter(m => m.status === "current" || m.status === "next").length} of {effectivePlan.milestones.length} active
+                          </span>
+                        </div>
+                        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-primary transition-all duration-500"
+                            style={{ 
+                              width: `${(effectivePlan.milestones.filter(m => m.status === "current" || m.status === "next").length / effectivePlan.milestones.length) * 100}%` 
+                            }}
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Milestone list */}
+                      <div className="space-y-3">
+                        {effectivePlan.milestones.slice(0, 3).map((milestone, index) => {
+                          const isActive = milestone.status === "current" || milestone.status === "next";
+                          const isCompleted = milestone.status === "complete";
+                          
+                          return (
+                            <div key={index} className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
+                                isCompleted ? "bg-green-500 text-white" :
+                                isActive ? "bg-primary text-white" :
+                                "bg-slate-200 text-slate-600"
+                              }`}>
+                                {isCompleted ? "✓" : index + 1}
+                              </div>
+                              <div className="flex-1">
+                                <p className={`text-sm font-medium ${
+                                  isCompleted ? "text-green-700" : 
+                                  isActive ? "text-slate-900" : 
+                                  "text-slate-500"
+                                }`}>
+                                  {milestone.label}
+                                </p>
+                                <p className="text-xs text-slate-500">{milestone.projectedDate}</p>
+                              </div>
+                              {isActive && (
+                                <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full font-medium">
+                                  {milestone.status === "current" ? "Current" : "Next"}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action buttons */}
+                  <div className="flex gap-3">
+                    <button
+                      className="flex-1 bg-primary py-3 px-4 rounded-xl font-semibold text-white active:scale-[0.97] transition-transform"
+                      onClick={() => setShowResponsibilityModal(true)}
+                    >
+                      I understand this plan
+                    </button>
+                    <button
+                      className="px-4 py-3 rounded-xl border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 transition-colors"
+                      onClick={() => {
+                        // Toggle details view
+                        setShowDetails(!showDetails);
+                      }}
+                    >
+                      {showDetails ? "Hide" : "Show"} details
+                    </button>
+                  </div>
+                </div>
+
+                {/* Expandable details */}
+                {showDetails && (
+                  <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 space-y-6">
+                    {/* 4-Bucket allocation */}
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3">4-Bucket Allocation</h3>
+                      <div className="space-y-2">
+                        {[
+                          { label: "Fixed Costs", key: "fixed", color: "bg-slate-500" },
+                          { label: "Savings", key: "savings", color: "bg-blue-500" },
+                          { label: "Investments", key: "investments", color: "bg-green-500" },
+                          { label: "Guilt-Free", key: "guiltFree", color: "bg-purple-500" },
+                        ].map((bucket) => (
+                          <div key={bucket.key} className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-3 h-3 rounded-full ${bucket.color}`} />
+                              <span className="text-sm text-slate-700">{bucket.label}</span>
+                            </div>
+                            <span className="text-sm font-medium text-slate-900">
+                              {formatCurrency(Number(currentBucketValues[bucket.key] || 0))} ({bucketPercentages[bucket.key]}%)
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Opportunity cost */}
+                    {effectivePlan?.opportunityCost?.plainLanguage && (
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3">Opportunity Cost</h3>
+                        <p className="text-sm text-slate-600">{effectivePlan.opportunityCost.plainLanguage}</p>
+                        {effectivePlan.opportunityCost.foregoingGrowth10yr > 0 && (
+                          <p className="text-xs text-slate-500 mt-1">
+                            Estimated 10-year growth foregone: {formatCurrency(effectivePlan.opportunityCost.foregoingGrowth10yr)}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Assumptions */}
+                    {effectivePlan?.assumptions && (
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3">Assumptions</h3>
+                        <ul className="space-y-1">
+                          {effectivePlan.assumptions.map((assumption, index) => (
+                            <li key={index} className="text-sm text-slate-600">• {assumption}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 )}
 
-                <section className="mt-8 bg-white p-6 rounded-2xl border border-slate-100">
-                  <h3 className="text-xl font-semibold mb-2">This week&apos;s action</h3>
-                  <p className="text-sm text-slate-700">{weeklyAction}</p>
-                </section>
+                {showResponsibilityModal && (
+                  <div className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center px-4">
+                    <div className="w-full max-w-lg bg-white rounded-2xl border border-slate-200 p-6 shadow-xl">
+                      <h3 className="text-xl font-semibold text-slate-900">Before you continue</h3>
+                      <p className="text-sm text-slate-600 mt-2">
+                        This app provides guidance only. You choose and execute all transfers, payments, and contributions.
+                      </p>
 
-                {/* Detail and assumptions */}
-                <section className="mt-8 bg-white p-6 rounded-2xl border border-slate-100">
-                  <h3 className="text-xl font-semibold mb-4">Detail and assumptions</h3>
-                  <div className="space-y-2 text-sm text-slate-600">
-                    <p>Debt roadmap: debt-free target is {debtFreeDateLabel}.</p>
-                    <p>Emergency fund target: {Number(effectivePlan?.emergencyFund?.targetMonths || 3)} months.</p>
-                    <p>Financial level: Level {Number(effectivePlan?.financialLevel?.current || plan.level.level)} ({effectivePlan?.financialLevel?.label || plan.level.name}).</p>
-                    <ul className="list-disc pl-5 space-y-1 mt-3">
-                      {assumptions.map((assumption) => (
-                        <li key={assumption}>{assumption}</li>
-                      ))}
-                    </ul>
+                      <ul className="mt-4 space-y-2 text-sm text-slate-700">
+                        <li>• You are responsible for every financial action.</li>
+                        <li>• You can regenerate this plan if your numbers change.</li>
+                        <li>• Verify CRA contribution room before large deposits.</li>
+                      </ul>
+
+                      <label className="flex items-start gap-3 mt-5">
+                        <input
+                          type="checkbox"
+                          className="mt-1 text-primary"
+                          checked={responsibilityAccepted}
+                          onChange={(event) => setResponsibilityAccepted(event.target.checked)}
+                        />
+                        <span className="text-sm text-slate-700">
+                          I understand MaplePlan does not execute actions for me. I decide and execute each step.
+                        </span>
+                      </label>
+
+                      <div className="mt-6 flex gap-3">
+                        <button
+                          type="button"
+                          className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 font-medium"
+                          onClick={() => {
+                            setShowResponsibilityModal(false);
+                            setResponsibilityAccepted(false);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          disabled={!responsibilityAccepted}
+                          className={`flex-1 py-2 rounded-lg font-semibold ${responsibilityAccepted ? "bg-slate-900 text-white" : "bg-slate-200 text-slate-500"}`}
+                          onClick={() => {
+                            setShowResponsibilityModal(false);
+                            setStepIndex(FLOW.indexOf("confirmation"));
+                          }}
+                        >
+                          Continue to action confirmation
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </section>
-
-                <div className="mt-12">
-                  <button
-                    className="w-full btn-secondary py-5 text-lg rounded-2xl"
-                    onClick={() => setStepIndex(stepIndex + 1)}
-                  >
-                    Review and confirm my decisions
-                  </button>
-                  <p className="text-center text-slate-400 text-xs mt-4 leading-relaxed px-8">
-                    This plan does not execute transactions. You choose each action and complete it yourself.
-                  </p>
-                </div>
+                )}
               </div>
             )}
 
-            {/* ─── COMPREHENSION (screen8) ─── */}
-            {currentStep === "comprehension" && (
-              <div className="min-h-[80vh] flex flex-col pt-12 pb-8">
-                <header>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Before confirmation</p>
-                  <h1 className="text-3xl font-semibold mt-3 leading-tight">Quick comprehension check</h1>
-                  <p className="text-slate-600 mt-3">
-                    We want to confirm the plan is clear. These checks keep the human decision boundary explicit.
-                  </p>
-                </header>
-
-                <section className="mt-8 space-y-4 flex-1">
-                  <article className="bg-white rounded-2xl border border-slate-200 p-5">
-                    <p className="font-semibold">1) Who executes transfers or payments?</p>
-                    <label className="flex items-center gap-3 mt-3">
-                      <input type="radio" name="q1" className="text-primary" onChange={() => setAnswers({ ...answers, q1: "wrong" })} />
-                      <span>The AI executes them after plan generation</span>
-                    </label>
-                    <label className="flex items-center gap-3 mt-2">
-                      <input type="radio" name="q1" className="text-primary" onChange={() => setAnswers({ ...answers, q1: "correct" })} />
-                      <span>I decide and execute every action myself</span>
-                    </label>
-                  </article>
-
-                  <article className="bg-white rounded-2xl border border-slate-200 p-5">
-                    <p className="font-semibold">2) What happens if your income changes?</p>
-                    <label className="flex items-center gap-3 mt-3">
-                      <input type="radio" name="q2" className="text-primary" onChange={() => setAnswers({ ...answers, q2: "correct" })} />
-                      <span>I run a return check-in and regenerate the plan</span>
-                    </label>
-                    <label className="flex items-center gap-3 mt-2">
-                      <input type="radio" name="q2" className="text-primary" onChange={() => setAnswers({ ...answers, q2: "wrong" })} />
-                      <span>The existing plan auto-trades between my accounts</span>
-                    </label>
-                  </article>
-
-                  <article className="bg-white rounded-2xl border border-slate-200 p-5">
-                    <p className="font-semibold">3) Where do contribution limits come from?</p>
-                    <label className="flex items-center gap-3 mt-3">
-                      <input type="radio" name="q3" className="text-primary" onChange={() => setAnswers({ ...answers, q3: "correct" })} />
-                      <span>My provided data, with CRA room checks before large deposits</span>
-                    </label>
-                    <label className="flex items-center gap-3 mt-2">
-                      <input type="radio" name="q3" className="text-primary" onChange={() => setAnswers({ ...answers, q3: "wrong" })} />
-                      <span>Always-real-time bank APIs in this prototype</span>
-                    </label>
-                  </article>
-                </section>
-
-                <footer className="pt-6">
-                  <p className="text-sm text-slate-600 mb-3">
-                    {totalAnswered === 3 ? `Score: ${comprehensionScore}/3` : "Answer all 3 checks to continue."}
-                  </p>
-                  <button
-                    className={`w-full py-4 rounded-full font-semibold inline-flex justify-center ${
-                      comprehensionReady
-                        ? "bg-slate-900 text-white"
-                        : "bg-slate-300 text-slate-500 pointer-events-none"
-                    }`}
-                    disabled={!comprehensionReady}
-                    onClick={() => setStepIndex(stepIndex + 1)}
-                  >
-                    Continue to action confirmation
-                  </button>
-                </footer>
-              </div>
+            {/* Floating agent chat button */}
+            {currentStep === "plan" && (
+              <button
+                className="fixed bottom-6 right-6 w-14 h-14 bg-primary rounded-full shadow-lg flex items-center justify-center text-white hover:bg-primary/90 active:scale-95 transition-all z-50"
+                onClick={() => {
+                  // Open chat modal or navigate to chat
+                  setStepIndex(FLOW.indexOf("intake"));
+                  // You could also open a modal here instead
+                }}
+              >
+                <span className="material-symbols-outlined text-2xl">chat</span>
+              </button>
             )}
 
             {/* ─── CONFIRMATION (screen9) ─── */}
@@ -1441,6 +1704,9 @@ export default function PlannerPage() {
                       <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Action {index + 1}</p>
                       <h2 className="text-lg font-semibold mt-1">{priority.action}</h2>
                       <p className="text-sm text-slate-600 mt-2">{priority.reasoning}</p>
+                      {priority.skipImpact && (
+                        <p className="text-xs text-amber-600 mt-2">{priority.skipImpact}</p>
+                      )}
                     </article>
                   ))}
                 </section>
@@ -1531,14 +1797,13 @@ export default function PlannerPage() {
                     className="w-full btn-secondary py-4 text-base"
                     onClick={() => {
                       setConfirmed(false);
-                      setAnswers({ q1: "", q2: "", q3: "" });
                       setStepIndex(FLOW.indexOf("reasoning"));
                     }}
                   >
                     Regenerate plan with these updates
                   </button>
                   <Link
-                    href="/"
+                    href="/app"
                     className="w-full inline-flex justify-center bg-slate-200 text-slate-700 py-4 rounded-full font-semibold"
                   >
                     Return to home
@@ -1551,7 +1816,7 @@ export default function PlannerPage() {
           {/* Bottom Navigation */}
           <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 px-4 py-2">
             <div className="flex justify-around">
-              <Link href="/" className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-neutral-surface/80 dark:hover:bg-white/10 transition-colors">
+              <Link href="/app" className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-neutral-surface/80 dark:hover:bg-white/10 transition-colors">
                 <span className="material-symbols-outlined">home</span>
                 <span className="text-xs">Home</span>
               </Link>
