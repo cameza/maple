@@ -130,7 +130,7 @@ export default function ProfilePage() {
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 px-4 py-2">
         <div className="flex justify-around">
-          <Link href="/" className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-neutral-surface/80 dark:hover:bg-white/10 transition-colors">
+          <Link href="/app" className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-neutral-surface/80 dark:hover:bg-white/10 transition-colors">
             <span className="material-symbols-outlined">home</span>
             <span className="text-xs">Home</span>
           </Link>

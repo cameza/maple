@@ -18,7 +18,6 @@ const FLOW = [
   "intake",
   "reasoning",
   "plan",
-  "comprehension",
   "confirmation",
   "checkin",
 ];
@@ -80,7 +79,6 @@ export default function PlannerPage() {
   const [intakeStarted, setIntakeStarted] = useState(false);
   const [monthlyIncome, setMonthlyIncome] = useState(6200);
   const [reasoningTick, setReasoningTick] = useState(0);
-  const [answers, setAnswers] = useState({ q1: "", q2: "", q3: "" });
   const [confirmed, setConfirmed] = useState(false);
   const [changeType, setChangeType] = useState("income_up");
   const [messages, setMessages] = useState([]);
@@ -102,6 +100,8 @@ export default function PlannerPage() {
   const [generationError, setGenerationError] = useState("");
   const [intakeValidationError, setIntakeValidationError] = useState("");
   const [showDetails, setShowDetails] = useState(false);
+  const [showResponsibilityModal, setShowResponsibilityModal] = useState(false);
+  const [responsibilityAccepted, setResponsibilityAccepted] = useState(false);
   const [expandedActions, setExpandedActions] = useState(new Set());
   const [profileForm, setProfileForm] = useState({ goal: "", age: "", province: "", firstTimeBuyer: "" });
   const [incomeForm, setIncomeForm] = useState({ monthlyIncome: "", incomeStability: "" });
@@ -197,6 +197,19 @@ export default function PlannerPage() {
   const weeklyAction = effectivePlan?.oneActionThisWeek || "Pick one transfer amount you can sustain and schedule it this week.";
   const bookRecommendation = effectivePlan?.bookRecommendation || null;
   const currentPhasePosition = Math.max(0, PHASE_ORDER.indexOf(currentPhase));
+  const goalDisplay = (effectivePlan?.goal || collectedData?.profile?.goal || "Build a stable financial plan").trim();
+  const goalReadiness = {
+    canAchieveNow: Boolean(effectivePlan?.goalReadiness?.canAchieveNow),
+    headline: effectivePlan?.goalReadiness?.headline || effectivePlan?.goalReadiness?.message || "No readiness assessment available yet.",
+    reason: effectivePlan?.goalReadiness?.reason || effectivePlan?.goalReadiness?.reasoning || "Generate your plan to see the sequence.",
+    focusNow: effectivePlan?.goalReadiness?.focusNow || "Focus now: complete your first action and keep momentum.",
+  };
+  const levelFramework = [
+    { id: 1, label: "Foundation", description: "Build a starter buffer and control high-interest debt." },
+    { id: 2, label: "Stability", description: "Complete emergency reserves and keep contributions consistent." },
+    { id: 3, label: "Growth", description: "Prioritize registered account growth and long-term goals." },
+  ];
+  const currentLevel = Number(effectivePlan?.financialLevel?.current || 1);
 
   const toNumber = (value) => {
     const parsed = Number(value);
@@ -342,6 +355,18 @@ export default function PlannerPage() {
           fhsa: { hasAccount: accountsForm.fhsaHas === "yes", balance: parsed.fhsaBalance, roomAvailable: parsed.fhsaRoom },
         },
       }));
+
+      // Educational message for first-time buyers who haven't opened FHSA
+      if (accountsForm.fhsaHas === "no" && profileForm.firstTimeBuyer === "yes") {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: "I noticed you haven't opened an FHSA yet. The First Home Savings Account lets first-time buyers contribute up to $8,000/year tax-free toward a down payment, and contributions are tax-deductible. Room only starts building once the account is open, so every year without one means $8,000 in lost room. I'll include opening an FHSA as a priority action in your plan. You can learn more here: /learn?topic=fhsa",
+          },
+        ]);
+      }
+
       goToNextIntakePhase();
       return;
     }
@@ -569,16 +594,20 @@ export default function PlannerPage() {
     }
   }, [collectedData, currentPhase, currentStep]);
 
-  const comprehensionScore = Object.values(answers).filter((value) => value === "correct").length;
-  const totalAnswered = Object.values(answers).filter(Boolean).length;
-  const comprehensionReady = totalAnswered === 3 && comprehensionScore >= 2;
-
   const bucketColors = [
     { key: "fixed", color: "#C8A15B", label: "Fixed" },
     { key: "investments", color: "#1A1A1A", label: "Investments" },
     { key: "savings", color: "#94A3B8", label: "Savings" },
     { key: "guiltFree", color: "#D1D5DB", label: "Guilt-Free" },
   ];
+
+  const convertUrlsToLinks = (text) => {
+    // Convert /learn?topic=* patterns to clickable links
+    return text.replace(
+      /\/learn\?topic=([a-zA-Z-]+)/g,
+      '<a href="/learn?topic=$1" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2 hover:text-amber-700 transition-colors cursor-pointer">/learn?topic=$1</a>'
+    );
+  };
 
   const renderChatMessageContent = (message) => {
     if (message.role === "user") {
@@ -602,7 +631,12 @@ export default function PlannerPage() {
         );
 
       if (!hasStructuredFields) {
-        return <p className="text-sm whitespace-pre-wrap">{message.content}</p>;
+        return (
+          <p 
+            className="text-sm whitespace-pre-wrap"
+            dangerouslySetInnerHTML={{ __html: convertUrlsToLinks(message.content) }}
+          />
+        );
       }
 
       return (
@@ -726,7 +760,12 @@ export default function PlannerPage() {
         </div>
       );
     } catch {
-      return <p className="text-sm whitespace-pre-wrap">{message.content}</p>;
+      return (
+        <p 
+          className="text-sm whitespace-pre-wrap"
+          dangerouslySetInnerHTML={{ __html: convertUrlsToLinks(message.content) }}
+        />
+      );
     }
   };
 
@@ -1172,13 +1211,13 @@ export default function PlannerPage() {
                     <div className="mt-1 mb-3 px-1 py-3 rounded-xl border border-amber-100 bg-amber-50 flex flex-col gap-1.5">
                       <p className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide px-1">Not sure about these accounts? Learn more:</p>
                       <div className="flex gap-2 flex-wrap px-1">
-                        <a href="/learn#tfsa" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">TFSA</a>
+                        <a href="/learn?topic=tfsa" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">TFSA</a>
                         <span className="text-amber-300">·</span>
-                        <a href="/learn#rrsp" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">RRSP</a>
+                        <a href="/learn?topic=rrsp" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">RRSP</a>
                         <span className="text-amber-300">·</span>
-                        <a href="/learn#fhsa" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">FHSA</a>
+                        <a href="/learn?topic=fhsa" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">FHSA</a>
                         <span className="text-amber-300">·</span>
-                        <a href="/learn#account-priority" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">Priority order</a>
+                        <a href="/learn?topic=account-priority" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-800 underline underline-offset-2">Priority order</a>
                       </div>
                     </div>
                   )}
@@ -1276,30 +1315,23 @@ export default function PlannerPage() {
             {/* ─── PLAN (screen6) ─── */}
             {currentStep === "plan" && (
               <div className="pb-10">
-                {/* Goal acknowledgment */}
-                {effectivePlan?.coachOpening && (
-                  <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
-                    <p className="text-sm text-amber-800 leading-relaxed">{effectivePlan.coachOpening}</p>
-                  </div>
-                )}
-
                 {/* Single plan card */}
                 <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-6">
                   {/* Your Goal Section */}
-                  {effectivePlan?.goal && effectivePlan?.goalReadiness && (
+                  {goalDisplay && (
                     <div className="mb-6 pb-6 border-b border-slate-100">
                       <p className="text-xs uppercase tracking-widest text-slate-400 font-semibold mb-2">Your Goal</p>
-                      <h2 className="text-xl font-bold text-slate-900 mb-3">{effectivePlan.goal}</h2>
-                      
+                      <h2 className="text-xl font-bold text-slate-900 mb-3">{goalDisplay}</h2>
+
                       <div className="bg-slate-50 rounded-lg p-4">
                         <div className="flex items-start gap-3">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                            effectivePlan.goalReadiness.canAchieveNow ? 'bg-green-100' : 'bg-amber-100'
+                            goalReadiness.canAchieveNow ? 'bg-green-100' : 'bg-amber-100'
                           }`}>
                             <span className={`material-symbols-outlined text-xl ${
-                              effectivePlan.goalReadiness.canAchieveNow ? 'text-green-700' : 'text-amber-700'
+                              goalReadiness.canAchieveNow ? 'text-green-700' : 'text-amber-700'
                             }`}>
-                              {effectivePlan.goalReadiness.canAchieveNow ? 'check_circle' : 'schedule'}
+                              {goalReadiness.canAchieveNow ? 'check_circle' : 'schedule'}
                             </span>
                           </div>
                           <div className="flex-1">
@@ -1307,12 +1339,15 @@ export default function PlannerPage() {
                               Can we help you achieve this now?
                             </p>
                             <p className={`text-sm font-medium mb-2 ${
-                              effectivePlan.goalReadiness.canAchieveNow ? 'text-green-700' : 'text-amber-700'
+                              goalReadiness.canAchieveNow ? 'text-green-700' : 'text-amber-700'
                             }`}>
-                              {effectivePlan.goalReadiness.message}
+                              {goalReadiness.headline}
                             </p>
                             <p className="text-xs text-slate-600 leading-relaxed">
-                              {effectivePlan.goalReadiness.reasoning}
+                              {goalReadiness.reason}
+                            </p>
+                            <p className="text-xs text-slate-700 leading-relaxed mt-2 font-medium">
+                              {goalReadiness.focusNow}
                             </p>
                           </div>
                         </div>
@@ -1322,19 +1357,25 @@ export default function PlannerPage() {
 
                   {/* Financial level */}
                   <div className="mb-6 pb-4 border-b border-slate-100">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs uppercase tracking-widest text-slate-400 font-semibold">Current Level</p>
-                        <p className="text-lg font-semibold text-slate-900">
-                          {effectivePlan?.financialLevel?.label || plan.level || "Foundation"}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs uppercase tracking-widest text-slate-400 font-semibold">Next Milestone</p>
-                        <p className="text-sm font-medium text-slate-600">
-                          {effectivePlan?.financialLevel?.nextMilestone || "Build consistency"}
-                        </p>
-                      </div>
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-xs uppercase tracking-widest text-slate-400 font-semibold">Financial Level Framework</p>
+                      <p className="text-xs text-slate-500">Current: Level {currentLevel}</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {levelFramework.map((levelItem) => {
+                        const isActive = currentLevel === levelItem.id;
+                        return (
+                          <div
+                            key={levelItem.id}
+                            className={`rounded-lg border p-3 ${isActive ? "border-primary bg-primary/5" : "border-slate-200 bg-slate-50"}`}
+                          >
+                            <p className={`text-sm font-semibold ${isActive ? "text-primary" : "text-slate-700"}`}>
+                              Level {levelItem.id}: {levelItem.label}
+                            </p>
+                            <p className="text-xs text-slate-600 mt-1">{levelItem.description}</p>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -1366,6 +1407,11 @@ export default function PlannerPage() {
                                         Complete by {priority.completionDate}
                                       </p>
                                     )}
+                                    {priority.interestCostPerMonth > 0 && (
+                                      <p className="text-xs text-amber-600 mt-1">
+                                        This debt costs you ~{formatCurrency(priority.interestCostPerMonth)}/month in interest
+                                      </p>
+                                    )}
                                   </div>
                                   <span className="material-symbols-outlined text-slate-400 ml-2">
                                     {isExpanded ? "expand_less" : "expand_more"}
@@ -1373,10 +1419,43 @@ export default function PlannerPage() {
                                 </div>
                               </div>
                             </div>
-                            
-                            {isExpanded && priority.reasoning && (
-                              <div className="px-4 pb-4 pl-8 border-t border-slate-200">
-                                <p className="text-sm text-slate-600 mt-3">{priority.reasoning}</p>
+
+                            {isExpanded && (
+                              <div className="px-4 pb-4 pl-8 border-t border-slate-200 space-y-3 mt-3">
+                                {priority.reasoning && (
+                                  <p className="text-sm text-slate-600">{priority.reasoning}</p>
+                                )}
+                                {priority.cashFlowUnlocked > 0 && (
+                                  <div className="flex items-start gap-2">
+                                    <span className="material-symbols-outlined text-green-600 text-base mt-0.5">trending_up</span>
+                                    <p className="text-sm text-slate-700">
+                                      When done, you will have {formatCurrency(priority.cashFlowUnlocked)}/month to redirect to your next goal.
+                                    </p>
+                                  </div>
+                                )}
+                                {priority.unlocksLevel && (
+                                  <div className="flex items-start gap-2">
+                                    <span className="material-symbols-outlined text-primary text-base mt-0.5">lock_open</span>
+                                    <p className="text-sm text-slate-700">
+                                      Completing this unlocks Level {priority.unlocksLevel.level}: {priority.unlocksLevel.label}
+                                    </p>
+                                  </div>
+                                )}
+                                {priority.skipImpact && (
+                                  <div className="flex items-start gap-2">
+                                    <span className="material-symbols-outlined text-amber-500 text-base mt-0.5">schedule</span>
+                                    <p className="text-sm text-slate-700">{priority.skipImpact}</p>
+                                  </div>
+                                )}
+                                {priority.learnMoreTopic && (
+                                  <a
+                                    href={`/learn?topic=${priority.learnMoreTopic}`}
+                                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                                  >
+                                    <span className="material-symbols-outlined text-sm">menu_book</span>
+                                    Learn more about this
+                                  </a>
+                                )}
                               </div>
                             )}
                           </div>
@@ -1384,6 +1463,29 @@ export default function PlannerPage() {
                       })}
                     </div>
                   </div>
+
+                  {/* Goal projection */}
+                  {effectivePlan?.goalProjection && (
+                    <div className="mb-6 bg-green-50 rounded-lg p-4 border border-green-200">
+                      <h3 className="text-lg font-semibold mb-3">{effectivePlan.goalProjection.title || "Projected Savings Pool"}</h3>
+                      <div className="space-y-2">
+                        {(effectivePlan.goalProjection.sources || []).map((source) => (
+                          <div key={source.label} className="flex justify-between text-sm">
+                            <span className="text-slate-600">{source.label}</span>
+                            <span className="font-medium text-slate-900">{formatCurrency(source.amount)}</span>
+                          </div>
+                        ))}
+                        {effectivePlan.goalProjection.totalEstimate > 0 && (
+                          <div className="border-t border-green-200 pt-2 flex justify-between font-semibold">
+                            <span className="text-slate-900">
+                              Estimated total ({effectivePlan.goalProjection.timelineYears}-year horizon)
+                            </span>
+                            <span className="text-green-700">{formatCurrency(effectivePlan.goalProjection.totalEstimate)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Timeline preview */}
                   {effectivePlan?.milestones && effectivePlan.milestones.length > 0 && (
@@ -1449,7 +1551,7 @@ export default function PlannerPage() {
                   <div className="flex gap-3">
                     <button
                       className="flex-1 bg-primary py-3 px-4 rounded-xl font-semibold text-white active:scale-[0.97] transition-transform"
-                      onClick={() => setStepIndex(stepIndex + 1)}
+                      onClick={() => setShowResponsibilityModal(true)}
                     >
                       I understand this plan
                     </button>
@@ -1492,10 +1594,15 @@ export default function PlannerPage() {
                     </div>
 
                     {/* Opportunity cost */}
-                    {effectivePlan?.opportunityCost && (
+                    {effectivePlan?.opportunityCost?.plainLanguage && (
                       <div>
                         <h3 className="text-lg font-semibold mb-3">Opportunity Cost</h3>
-                        <p className="text-sm text-slate-600">{effectivePlan.opportunityCost}</p>
+                        <p className="text-sm text-slate-600">{effectivePlan.opportunityCost.plainLanguage}</p>
+                        {effectivePlan.opportunityCost.foregoingGrowth10yr > 0 && (
+                          <p className="text-xs text-slate-500 mt-1">
+                            Estimated 10-year growth foregone: {formatCurrency(effectivePlan.opportunityCost.foregoingGrowth10yr)}
+                          </p>
+                        )}
                       </div>
                     )}
 
@@ -1510,6 +1617,59 @@ export default function PlannerPage() {
                         </ul>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {showResponsibilityModal && (
+                  <div className="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center px-4">
+                    <div className="w-full max-w-lg bg-white rounded-2xl border border-slate-200 p-6 shadow-xl">
+                      <h3 className="text-xl font-semibold text-slate-900">Before you continue</h3>
+                      <p className="text-sm text-slate-600 mt-2">
+                        This app provides guidance only. You choose and execute all transfers, payments, and contributions.
+                      </p>
+
+                      <ul className="mt-4 space-y-2 text-sm text-slate-700">
+                        <li>• You are responsible for every financial action.</li>
+                        <li>• You can regenerate this plan if your numbers change.</li>
+                        <li>• Verify CRA contribution room before large deposits.</li>
+                      </ul>
+
+                      <label className="flex items-start gap-3 mt-5">
+                        <input
+                          type="checkbox"
+                          className="mt-1 text-primary"
+                          checked={responsibilityAccepted}
+                          onChange={(event) => setResponsibilityAccepted(event.target.checked)}
+                        />
+                        <span className="text-sm text-slate-700">
+                          I understand MaplePlan does not execute actions for me. I decide and execute each step.
+                        </span>
+                      </label>
+
+                      <div className="mt-6 flex gap-3">
+                        <button
+                          type="button"
+                          className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 font-medium"
+                          onClick={() => {
+                            setShowResponsibilityModal(false);
+                            setResponsibilityAccepted(false);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          disabled={!responsibilityAccepted}
+                          className={`flex-1 py-2 rounded-lg font-semibold ${responsibilityAccepted ? "bg-slate-900 text-white" : "bg-slate-200 text-slate-500"}`}
+                          onClick={() => {
+                            setShowResponsibilityModal(false);
+                            setStepIndex(FLOW.indexOf("confirmation"));
+                          }}
+                        >
+                          Continue to action confirmation
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1529,74 +1689,6 @@ export default function PlannerPage() {
               </button>
             )}
 
-            {/* ─── COMPREHENSION (screen8) ─── */}
-            {currentStep === "comprehension" && (
-              <div className="min-h-[80vh] flex flex-col pt-12 pb-8">
-                <header>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Before confirmation</p>
-                  <h1 className="text-3xl font-semibold mt-3 leading-tight">Quick comprehension check</h1>
-                  <p className="text-slate-600 mt-3">
-                    We want to confirm the plan is clear. These checks keep the human decision boundary explicit.
-                  </p>
-                </header>
-
-                <section className="mt-8 space-y-4 flex-1">
-                  <article className="bg-white rounded-2xl border border-slate-200 p-5">
-                    <p className="font-semibold">1) Who executes transfers or payments?</p>
-                    <label className="flex items-center gap-3 mt-3">
-                      <input type="radio" name="q1" className="text-primary" onChange={() => setAnswers({ ...answers, q1: "wrong" })} />
-                      <span>The AI executes them after plan generation</span>
-                    </label>
-                    <label className="flex items-center gap-3 mt-2">
-                      <input type="radio" name="q1" className="text-primary" onChange={() => setAnswers({ ...answers, q1: "correct" })} />
-                      <span>I decide and execute every action myself</span>
-                    </label>
-                  </article>
-
-                  <article className="bg-white rounded-2xl border border-slate-200 p-5">
-                    <p className="font-semibold">2) What happens if your income changes?</p>
-                    <label className="flex items-center gap-3 mt-3">
-                      <input type="radio" name="q2" className="text-primary" onChange={() => setAnswers({ ...answers, q2: "correct" })} />
-                      <span>I run a return check-in and regenerate the plan</span>
-                    </label>
-                    <label className="flex items-center gap-3 mt-2">
-                      <input type="radio" name="q2" className="text-primary" onChange={() => setAnswers({ ...answers, q2: "wrong" })} />
-                      <span>The existing plan auto-trades between my accounts</span>
-                    </label>
-                  </article>
-
-                  <article className="bg-white rounded-2xl border border-slate-200 p-5">
-                    <p className="font-semibold">3) Where do contribution limits come from?</p>
-                    <label className="flex items-center gap-3 mt-3">
-                      <input type="radio" name="q3" className="text-primary" onChange={() => setAnswers({ ...answers, q3: "correct" })} />
-                      <span>My provided data, with CRA room checks before large deposits</span>
-                    </label>
-                    <label className="flex items-center gap-3 mt-2">
-                      <input type="radio" name="q3" className="text-primary" onChange={() => setAnswers({ ...answers, q3: "wrong" })} />
-                      <span>Always-real-time bank APIs in this prototype</span>
-                    </label>
-                  </article>
-                </section>
-
-                <footer className="pt-6">
-                  <p className="text-sm text-slate-600 mb-3">
-                    {totalAnswered === 3 ? `Score: ${comprehensionScore}/3` : "Answer all 3 checks to continue."}
-                  </p>
-                  <button
-                    className={`w-full py-4 rounded-full font-semibold inline-flex justify-center ${
-                      comprehensionReady
-                        ? "bg-slate-900 text-white"
-                        : "bg-slate-300 text-slate-500 pointer-events-none"
-                    }`}
-                    disabled={!comprehensionReady}
-                    onClick={() => setStepIndex(stepIndex + 1)}
-                  >
-                    Continue to action confirmation
-                  </button>
-                </footer>
-              </div>
-            )}
-
             {/* ─── CONFIRMATION (screen9) ─── */}
             {currentStep === "confirmation" && (
               <div className="min-h-[80vh] flex flex-col pt-12 pb-8">
@@ -1612,6 +1704,9 @@ export default function PlannerPage() {
                       <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Action {index + 1}</p>
                       <h2 className="text-lg font-semibold mt-1">{priority.action}</h2>
                       <p className="text-sm text-slate-600 mt-2">{priority.reasoning}</p>
+                      {priority.skipImpact && (
+                        <p className="text-xs text-amber-600 mt-2">{priority.skipImpact}</p>
+                      )}
                     </article>
                   ))}
                 </section>
@@ -1702,14 +1797,13 @@ export default function PlannerPage() {
                     className="w-full btn-secondary py-4 text-base"
                     onClick={() => {
                       setConfirmed(false);
-                      setAnswers({ q1: "", q2: "", q3: "" });
                       setStepIndex(FLOW.indexOf("reasoning"));
                     }}
                   >
                     Regenerate plan with these updates
                   </button>
                   <Link
-                    href="/"
+                    href="/app"
                     className="w-full inline-flex justify-center bg-slate-200 text-slate-700 py-4 rounded-full font-semibold"
                   >
                     Return to home
@@ -1722,7 +1816,7 @@ export default function PlannerPage() {
           {/* Bottom Navigation */}
           <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 px-4 py-2">
             <div className="flex justify-around">
-              <Link href="/" className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-neutral-surface/80 dark:hover:bg-white/10 transition-colors">
+              <Link href="/app" className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-neutral-surface/80 dark:hover:bg-white/10 transition-colors">
                 <span className="material-symbols-outlined">home</span>
                 <span className="text-xs">Home</span>
               </Link>

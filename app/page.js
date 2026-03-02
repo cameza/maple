@@ -1,171 +1,178 @@
 import Link from "next/link";
-import "./globals.css";
+import Head from "next/head";
 
-export default function HomePage() {
+export default function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col" style={{backgroundColor: '#f8f8f6', color: '#1a1a1a', fontFamily: 'Manrope, sans-serif'}}>
-      {/* Header */}
-      <header className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between" style={{backgroundColor: 'rgba(248, 248, 246, 0.8)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #f1f0ea'}}>
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg" style={{backgroundColor: '#ecb613'}}>
-            <span className="material-symbols-outlined text-xl leading-none" style={{color: '#221d10'}}>account_balance_wallet</span>
-          </div>
-          <span className="font-bold text-lg tracking-tight">MaplePlan</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="p-2 rounded-full transition-colors" style={{backgroundColor: 'transparent'}}>
-            <span className="material-symbols-outlined">notifications</span>
-          </button>
-          <button className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden" style={{backgroundColor: 'rgba(236, 182, 19, 0.2)', border: '1px solid rgba(236, 182, 19, 0.3)'}}>
-            <span className="material-symbols-outlined" style={{color: '#ecb613'}}>person</span>
-          </button>
-        </div>
-      </header>
+    <>
+      <Head>
+        <title>Maple | AI Financial Planning Agent</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+          rel="stylesheet"
+        />
+        <script src="https://cdn.tailwindcss.com" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              tailwind.config = {
+                theme: {
+                  extend: {
+                    colors: {
+                      paper: '#FDFCF9',
+                      ink: '#1A1C19',
+                      sand: '#F4F2E9',
+                      stone: {
+                        100: '#F2EFEB',
+                        200: '#E6E2D8',
+                        300: '#D5CFC3',
+                        400: '#A39C93',
+                        500: '#7A756C',
+                        600: '#54504A',
+                      },
+                      gold: '#C69F60'
+                    },
+                    fontFamily: {
+                      serif: ['"Playfair Display"', 'Georgia', 'serif'],
+                      sans: ['"Inter"', 'system-ui', 'sans-serif'],
+                    }
+                  }
+                }
+              }
+            `,
+          }}
+        />
+      </Head>
 
-      <main className="flex-1 pb-24">
-        {/* Hero Section */}
-        <div className="px-4 pt-6">
-          <div className="relative overflow-hidden rounded-xl p-6" style={{backgroundColor: '#221d10'}}>
-            <div className="relative z-10 space-y-4 max-w-[300px]">
-              <h1 className="text-3xl font-bold leading-tight" style={{color: 'white'}}>
-                Finally understand<br />where your money<br />should go.
-              </h1>
-              <p className="text-sm leading-relaxed" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
-                MaplePlan is your AI financial coach for Canadians. Tell it your income, debts, and accounts — it builds a prioritized action plan across your TFSA, RRSP, FHSA, and everyday spending. You stay in control.
+      <div className="bg-paper text-ink font-sans antialiased selection:bg-stone-200 selection:text-ink pb-12">
+        {/* Section 1 */}
+        <section className="min-h-[70vh] flex flex-col justify-center px-6 py-20 sm:px-12 lg:px-24 border-b border-stone-200">
+          <div className="max-w-5xl mx-auto w-full">
+            <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight mb-12">
+              AI Financial Planning Agent <br className="hidden sm:block" />
+              <span className="italic text-stone-500">for Canadians</span>
+            </h1>
+            <div className="space-y-6 text-xl sm:text-2xl font-sans font-light text-stone-600 leading-relaxed max-w-4xl border-l border-stone-300 pl-6 sm:pl-8 ml-2 sm:ml-4">
+              <p>
+                Most Canadians manage their finances reactively. They have income, debts, and registered accounts — TFSA, RRSP, FHSA — sitting in silos across institutions, with no coherent plan connecting them. The tools that exist (budgeting apps, bank dashboards, spreadsheets) output numbers. They do not teach, reason, or plan. Getting a real plan used to mean paying $150 to $400 an hour for a financial advisor, or years of self-education across fragmented resources.
               </p>
-              <div className="flex flex-wrap gap-3 text-xs" style={{color: 'rgba(255, 255, 255, 0.6)'}}>
-                <span>⚡ 15-min intake</span>
-                <span>🇨🇦 TFSA · RRSP · FHSA</span>
-                <span>🔒 No auto-transactions</span>
-              </div>
-              <Link 
-                href="/planner" 
-                className="font-bold text-sm inline-flex items-center gap-2 hover:opacity-90 transition-opacity" style={{backgroundColor: '#ecb613', color: '#221d10', padding: '12px 24px', borderRadius: '9999px', textDecoration: 'none'}}
-              >
-                Build my free plan
-                <span className="material-symbols-outlined text-sm">arrow_forward</span>
-              </Link>
+              <p>
+                The person this is built for is someone who wants to be financially free but does not know where to start. They are not financially illiterate — they are financially underserved. They know they should be doing something with their TFSA. They have heard of an RRSP. They are not sure which credit card to pay off first. They are motivated, but the system has never met them where they are.
+              </p>
+              <p className="font-medium text-ink text-2xl sm:text-3xl mt-8 pt-4">This agent changes that.</p>
             </div>
-            {/* Decorative Background Gradient */}
-            <div className="absolute top-0 right-0 w-full h-full opacity-30" style={{background: 'radial-gradient(circle at top right, #f2b90d 0%, transparent 60%)'}}></div>
           </div>
-        </div>
+        </section>
 
-        {/* Financial Level Widget */}
-        <section className="px-4 mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold tracking-tight">Your Financial Level</h2>
-            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">ESTIMATED</span>
+        {/* Section 2 */}
+        <section className="flex flex-col justify-center px-6 py-20 sm:px-12 lg:px-24 bg-white border-b border-stone-100">
+          <div className="max-w-5xl mx-auto w-full">
+            <h2 className="font-serif text-4xl sm:text-5xl text-ink mb-10 tracking-tight">What the human can now do</h2>
+            <div className="space-y-6 text-lg sm:text-xl font-sans font-light text-stone-600 leading-relaxed max-w-4xl">
+              <p>
+                A person with no financial background can sit down for 15 minutes, enter their financial snapshot — take-home income, debts with interest rates, monthly expenses, registered account balances and contribution room — and walk away with a personalized annual financial plan they actually understand.
+              </p>
+              <p>
+                The plan tells them which account to fill first and why. If they are a first-time buyer, the FHSA gets priority. If their income puts them in a high bracket, the RRSP makes more sense. It gives them a debt payoff sequence — avalanche (highest interest first) or snowball (smallest balance first) — based on their numbers and situation, with a projected debt-free date. It shows them exactly how to split their monthly cash flow across fixed costs, debt payments, registered savings, and discretionary spending. And it quantifies what inaction costs:{' '}
+                <span className="italic text-stone-500">
+                  "You are on pace to leave $4,200 of TFSA room unused this year. At a 4.5% return, that is roughly $189 in foregone tax-free growth."
+                </span>
+              </p>
+              <p>
+                Every explanation is tied to the user's specific numbers — not generic tips. Over time, as the user engages with the reasoning behind each recommendation, they build genuine financial literacy. The goal is not just a better plan.{' '}
+                <span className="font-medium text-ink bg-sand px-2 py-1 rounded">It is a more capable person.</span>
+              </p>
+            </div>
           </div>
-          <div className="bg-white dark:bg-card-dark rounded-xl p-4 border border-neutral-surface dark:border-white/10">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-text-muted">Current Status</p>
-                  <h3 className="font-semibold text-lg">Level 1: Foundation</h3>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-primary">1</p>
-                  <p className="text-xs text-text-muted">of 5</p>
-                </div>
-              </div>
-              {/* Level progress bar - 5 segments */}
-              <div className="flex gap-1.5 h-2">
-                <div className="flex-1 rounded-full bg-primary" />
-                <div className="flex-1 rounded-full bg-slate-200 dark:bg-slate-700" />
-                <div className="flex-1 rounded-full bg-slate-200 dark:bg-slate-700" />
-                <div className="flex-1 rounded-full bg-slate-200 dark:bg-slate-700" />
-                <div className="flex-1 rounded-full bg-slate-200 dark:bg-slate-700" />
-              </div>
-              <div className="flex items-center gap-2 p-3 bg-neutral-surface dark:bg-white/5 rounded-lg">
-                <span className="material-symbols-outlined text-primary">info</span>
-                <p className="text-sm">
-                  You're currently in the Foundation phase. Priority: Building a $1,000 emergency fund and tackling high-interest debt.
+        </section>
+
+        {/* Section 3 & 4 Grid */}
+        <section className="px-6 py-20 sm:px-12 lg:px-24 bg-sand border-b border-stone-200">
+          <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
+            {/* Section 3 */}
+            <div className="bg-paper p-8 sm:p-12 rounded-[2rem] shadow-sm border border-stone-200 transition-transform hover:-translate-y-1 duration-300 flex flex-col">
+              <h2 className="font-serif text-3xl sm:text-4xl text-ink mb-6 tracking-tight">What AI is responsible for</h2>
+              <div className="w-12 h-px bg-gold mb-6"></div>
+              <p className="text-lg sm:text-lg font-sans font-light text-stone-600 leading-relaxed flex-grow">
+                The AI synthesizes the financial snapshot into a coherent, prioritized plan. It handles contribution sequencing logic, debt strategy trade-offs, and cash flow math. It explains each recommendation in plain language, monitors for drift, and surfaces opportunity cost proactively. It carries the cognitive load so the human can focus on deciding and acting.
+              </p>
+            </div>
+
+            {/* Section 4 */}
+            <div className="bg-ink text-paper p-8 sm:p-12 rounded-[2rem] shadow-2xl border border-stone-600 relative overflow-hidden transition-transform hover:-translate-y-1 duration-300 group flex flex-col">
+              <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <h2 className="font-serif text-3xl sm:text-4xl mb-6 tracking-tight text-gold relative z-10">Where AI must stop</h2>
+              <div className="w-12 h-px bg-gold/40 mb-6 relative z-10"></div>
+              <p className="text-lg sm:text-lg font-sans font-light text-stone-300 leading-relaxed relative z-10 flex-grow">
+                The AI never executes, initiates, or recommends the execution of any financial transaction. Every actionable step requires explicit human approval. This boundary is principled, not just cautious. Financial decisions are consequential, personal, and sometimes irreversible. A mathematically optimal plan may still be wrong for a specific person given their risk tolerance, life circumstances, and values. The AI's role is to make the human better informed and more capable of deciding — not to decide for them.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 5 */}
+        <section className="flex flex-col justify-center px-6 py-20 sm:px-12 lg:px-24 bg-white">
+          <div className="max-w-5xl mx-auto w-full">
+            <h2 className="font-serif text-4xl sm:text-5xl text-ink mb-10 tracking-tight">What would break first at scale</h2>
+            <div className="bg-stone-50 p-8 sm:p-12 rounded-[2rem] border border-stone-200 relative">
+              <span className="absolute -top-3 left-8 bg-paper px-3 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border border-stone-200 rounded-full">
+                Challenge
+              </span>
+              <h3 className="font-sans text-xl font-medium text-ink mb-4 uppercase tracking-widest text-stone-500 mt-2">Data Quality.</h3>
+              <div className="space-y-6 text-lg sm:text-xl font-sans font-light text-stone-600 leading-relaxed">
+                <p>
+                  The plan is only as good as the financial snapshot it runs on. Canadian financial institutions have limited, inconsistent, and often inaccessible APIs. There is no reliable way to pull real-time balances or contribution room programmatically across TD, RBC, Scotiabank, and Wealthsimple simultaneously.
+                </p>
+                <p>
+                  For the prototype, human-in-the-loop data entry keeps accuracy accountable. At scale, the prerequisite is a standardized connection layer across Canadian institutions — a Financial{' '}
+                  <span className="font-medium text-ink">MCP (Model Context Protocol)</span> layer that abstracts away institution-specific integrations and makes real-time, multi-institution data possible. This is the infrastructure that unlocks not just this agent, but an entire category of Canadian financial AI tools.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Knowledge Base */}
-        <section className="px-4 mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold tracking-tight">Knowledge Base</h2>
-            <Link href="/learn" className="text-sm text-primary hover:underline">View all</Link>
-          </div>
-          <div className="space-y-3">
-            <Link href="/learn#tfsa" className="block bg-white dark:bg-card-dark rounded-xl p-4 border border-neutral-surface dark:border-white/10 hover:bg-neutral-surface/50 dark:hover:bg-white/5 transition-colors">
-              <div className="flex gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-primary">account_balance</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold">TFSA vs RRSP</h3>
-                  <p className="text-sm text-text-muted">Which registered account is right for your goals?</p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <span className="material-symbols-outlined text-xs text-text-muted">schedule</span>
-                    <span className="text-xs text-text-muted">4 min read</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
+        {/* CTA Button */}
+        <section className="px-6 pb-24 pt-8 flex flex-col items-center justify-center">
+          <Link
+            href="/app"
+            className="group inline-flex items-center justify-center px-10 py-5 bg-ink text-paper font-sans text-lg font-medium rounded-full shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-transparent overflow-hidden relative mb-16"
+          >
+            <div className="absolute inset-0 bg-stone-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <span className="relative z-10 flex items-center">
+              Enter Prototype
+              <svg className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+              </svg>
+            </span>
+          </Link>
 
-            <Link href="/learn#4-bucket" className="block bg-white dark:bg-card-dark rounded-xl p-4 border border-neutral-surface dark:border-white/10 hover:bg-neutral-surface/50 dark:hover:bg-white/5 transition-colors">
-              <div className="flex gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-primary">layers</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold">The 4-Bucket Rule</h3>
-                  <p className="text-sm text-text-muted">Organize your cash flow with this simple system.</p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <span className="material-symbols-outlined text-xs text-text-muted">schedule</span>
-                    <span className="text-xs text-text-muted">6 min read</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            <Link href="/learn#debt-avalanche-snowball" className="block bg-white dark:bg-card-dark rounded-xl p-4 border border-neutral-surface dark:border-white/10 hover:bg-neutral-surface/50 dark:hover:bg-white/5 transition-colors">
-              <div className="flex gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-primary">trending_down</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold">Debt Avalanche</h3>
-                  <p className="text-sm text-text-muted">The mathematically fastest way to be debt-free.</p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <span className="material-symbols-outlined text-xs text-text-muted">schedule</span>
-                    <span className="text-xs text-text-muted">5 min read</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
+          {/* Footer */}
+          <div className="flex flex-col items-center justify-center space-y-4 pt-12 border-t border-stone-200 w-full max-w-xs">
+            <p className="font-sans text-sm tracking-wide text-stone-500 uppercase">
+              Submitted by: <span className="font-medium text-ink">Camilo Meza</span>
+            </p>
+            <div className="flex items-center gap-6">
+              {/* LinkedIn Icon */}
+              <a href="https://www.linkedin.com/in/mezacamilo/" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-ink transition-colors duration-300">
+                <span className="sr-only">LinkedIn</span>
+                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fillRule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clipRule="evenodd" />
+                </svg>
+              </a>
+              {/* GitHub Icon */}
+              <a href="https://github.com/cameza" target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-ink transition-colors duration-300">
+                <span className="sr-only">GitHub</span>
+                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+                </svg>
+              </a>
+            </div>
           </div>
         </section>
-      </main>
-
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 px-4 py-2">
-        <div className="flex justify-around">
-          <Link href="/" className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-neutral-surface/80 dark:hover:bg-white/10 transition-colors">
-            <span className="material-symbols-outlined">home</span>
-            <span className="text-xs">Home</span>
-          </Link>
-          <Link href="/planner" className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-neutral-surface/80 dark:hover:bg-white/10 transition-colors">
-            <span className="material-symbols-outlined">analytics</span>
-            <span className="text-xs">Planner</span>
-          </Link>
-          <Link href="/learn" className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-neutral-surface/80 dark:hover:bg-white/10 transition-colors">
-            <span className="material-symbols-outlined">auto_stories</span>
-            <span className="text-xs">Learn</span>
-          </Link>
-          <Link href="/profile" className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-neutral-surface/80 dark:hover:bg-white/10 transition-colors">
-            <span className="material-symbols-outlined">person</span>
-            <span className="text-xs">Profile</span>
-          </Link>
-        </div>
-      </nav>
-    </div>
+      </div>
+    </>
   );
 }

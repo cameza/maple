@@ -20,6 +20,79 @@ function timelineToMonthLabel(timelineText, fallbackMonths = 1) {
   return monthLabelFromNow(months);
 }
 
+function classifyMilestoneType(title) {
+  const t = (title || "").toLowerCase();
+  if (t.includes("debt") || t.includes("pay off") || t.includes("credit") || t.includes("loan")) return "debt";
+  if (t.includes("emergency") || t.includes("buffer")) return "emergency-fund";
+  if (t.includes("fhsa")) return "fhsa";
+  if (t.includes("tfsa") || t.includes("rrsp") || t.includes("registered")) return "investing";
+  return "general";
+}
+
+function computeEnrichedFields(item, profile, metrics, currentFinancialLevel) {
+  const type = classifyMilestoneType(item?.title);
+  const monthlyContribution = Math.max(0, asNumber(item?.monthlyContribution));
+
+  // interestCostPerMonth (debt actions only)
+  let interestCostPerMonth = null;
+  if (type === "debt" && metrics.debtBalance > 0) {
+    interestCostPerMonth = Math.round(
+      profile.debts.reduce((sum, d) => sum + (asNumber(d.balance) * asNumber(d.apr) / 100 / 12), 0)
+    );
+  }
+
+  // cashFlowUnlocked
+  let cashFlowUnlocked = null;
+  if (type === "debt" && monthlyContribution > 0) {
+    cashFlowUnlocked = monthlyContribution + metrics.totalDebtMinimums;
+  } else if (monthlyContribution > 0) {
+    cashFlowUnlocked = monthlyContribution;
+  }
+
+  // unlocksLevel - simulate completing this milestone
+  let unlocksLevel = null;
+  if (type === "emergency-fund") {
+    const titleLower = (item?.title || "").toLowerCase();
+    const wouldHaveMonths = titleLower.includes("3") ? 3 : 1;
+    if (wouldHaveMonths >= 3 && !metrics.hasHighInterestDebt) {
+      if (currentFinancialLevel < 3) unlocksLevel = { level: 3, label: "Growth" };
+    } else if (wouldHaveMonths >= 1 && !metrics.hasHighInterestDebt) {
+      if (currentFinancialLevel < 2) unlocksLevel = { level: 2, label: "Stability" };
+    }
+  } else if (type === "debt") {
+    if (metrics.emergencyFundMonths >= 3) {
+      if (currentFinancialLevel < 3) unlocksLevel = { level: 3, label: "Growth" };
+    } else if (metrics.emergencyFundMonths >= 1) {
+      if (currentFinancialLevel < 2) unlocksLevel = { level: 2, label: "Stability" };
+    }
+  }
+
+  // skipImpact
+  let skipImpact = null;
+  if (type === "debt" && interestCostPerMonth > 0) {
+    skipImpact = `Skipping a month costs roughly $${interestCostPerMonth} in extra interest.`;
+  } else if (monthlyContribution > 0) {
+    skipImpact = "Skipping a month adds roughly 1 month to your timeline.";
+  }
+
+  // learnMoreTopic
+  const topicMap = {
+    "debt": "debt-avalanche-snowball",
+    "emergency-fund": "emergency-fund",
+    "fhsa": "fhsa",
+    "investing": "tfsa",
+    "general": "account-priority",
+  };
+
+  return {
+    interestCostPerMonth,
+    cashFlowUnlocked,
+    unlocksLevel,
+    skipImpact,
+    learnMoreTopic: topicMap[type] || "account-priority",
+  };
+}
+
 function buildUiPlanShape(profile, metrics, agentPlan) {
   const totalDebt = profile.debts.reduce((sum, debt) => sum + asNumber(debt.balance), 0);
   const currentBuckets = {
@@ -42,6 +115,7 @@ function buildUiPlanShape(profile, metrics, agentPlan) {
     }))
     : [];
 
+  const currentLevel = asNumber(agentPlan?.financialLevel, 1);
   const priorities = (Array.isArray(agentPlan?.milestones) ? agentPlan.milestones : [])
     .slice(0, 3)
     .map((item, index) => ({
@@ -51,25 +125,26 @@ function buildUiPlanShape(profile, metrics, agentPlan) {
       dollarAmount: Math.max(0, asNumber(item?.monthlyContribution)),
       duration: item?.estimatedTimeline || "Ongoing",
       completionDate: item?.estimatedCompletionDate || "To be calculated",
+      ...computeEnrichedFields(item, profile, metrics, currentLevel),
     }));
 
   return {
-    goal: agentPlan?.goal || "Build a stable financial plan",
+    goal: profile.goal || agentPlan?.goal || "Build a stable financial plan",
     goalReadiness: agentPlan?.goalReadiness || {
       canAchieveNow: true,
-      message: "Here's your personalized path forward.",
-      reasoning: "Your plan prioritizes financial stability while working toward your goal."
+      headline: "Yes, this plan supports your goal now.",
+      reason: "Your plan prioritizes financial stability while working toward your goal.",
+      focusNow: "Focus now: execute the first milestone and keep contributions consistent."
     },
     financialLevel: {
       current: asNumber(agentPlan?.financialLevel, 1),
       label: agentPlan?.financialLevelLabel || "Foundation",
-      nextMilestone: milestones[1]?.label || milestones[0]?.label || "Build consistency",
     },
     snapshot: {
       monthlyIncome: asNumber(profile.income.monthly),
       totalDebt: asNumber(totalDebt),
       fixedCosts: asNumber(metrics.monthlyEssentials + metrics.totalDebtMinimums),
-      discretionary: Math.max(0, asNumber(profile.income.monthly) - asNumber(metrics.monthlyEssentials + metrics.totalDebtMinimums)),
+      discretionary: asNumber(metrics.discretionary),
       emergencyFundMonths: Number(metrics.emergencyFundMonths.toFixed(2)),
     },
     buckets: {
@@ -125,7 +200,8 @@ function buildUiPlanShape(profile, metrics, agentPlan) {
     },
     milestones,
     priorities,
-    coachOpening: agentPlan?.coachOpening || "Here's your personalized plan based on your current financial situation.",
+    goalProjection: agentPlan?.goalProjection || null,
+    reasoning: typeof agentPlan?.reasoning === "string" ? agentPlan.reasoning : null,
     bookRecommendation: {
       title: agentPlan?.bookRecommendation?.title || "The Psychology of Money",
       author: agentPlan?.bookRecommendation?.author || "Morgan Housel",

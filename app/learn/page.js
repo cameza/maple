@@ -1,9 +1,34 @@
 'use client';
 
+import { useEffect } from "react";
 import Link from "next/link";
 import "../globals.css";
 
 export default function LearnPage() {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const topic = params.get("topic");
+    if (!topic) return;
+
+    const section = document.getElementById(`content-${topic}`);
+    const icon = document.getElementById(`expand-${topic}`);
+    const card = document.getElementById(`card-${topic}`);
+
+    if (!section || !card) return;
+
+    const content = section.querySelector(".content-details");
+    if (!content) return;
+
+    if (content.style.display === "none" || content.style.display === "") {
+      content.style.display = "block";
+      if (icon) icon.textContent = "expand_less";
+    }
+
+    card.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
   const concepts = [
     {
       id: 'tfsa',
@@ -403,13 +428,13 @@ export default function LearnPage() {
         <section className="px-4 mt-6">
           <div className="space-y-3">
             {concepts.map((concept) => (
-              <div key={concept.id} className="bg-white dark:bg-card-dark rounded-xl border border-neutral-surface dark:border-white/10 overflow-hidden">
+              <div id={`card-${concept.id}`} key={concept.id} className="bg-white dark:bg-card-dark rounded-xl border border-neutral-surface dark:border-white/10 overflow-hidden">
                 <button
                   className="w-full p-4 text-left hover:bg-neutral-surface/50 dark:hover:bg-white/5 transition-colors"
                   onClick={() => {
                     const element = document.getElementById(`content-${concept.id}`);
                     const content = element.querySelector('.content-details');
-                    const icon = element.querySelector('.expand-icon');
+                    const icon = document.getElementById(`expand-${concept.id}`);
                     
                     if (content.style.display === 'none' || content.style.display === '') {
                       content.style.display = 'block';
@@ -432,7 +457,7 @@ export default function LearnPage() {
                         <span className="text-xs text-text-muted">{concept.readTime} read</span>
                       </div>
                     </div>
-                    <span className="material-symbols-outlined expand-icon text-text-muted">expand_more</span>
+                    <span id={`expand-${concept.id}`} className="material-symbols-outlined expand-icon text-text-muted">expand_more</span>
                   </div>
                 </button>
                 <div id={`content-${concept.id}`} className="border-t border-neutral-surface dark:border-white/10">
@@ -492,7 +517,7 @@ export default function LearnPage() {
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 px-4 py-2">
         <div className="flex justify-around">
-          <Link href="/" className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-neutral-surface/80 dark:hover:bg-white/10 transition-colors">
+          <Link href="/app" className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-neutral-surface/80 dark:hover:bg-white/10 transition-colors">
             <span className="material-symbols-outlined">home</span>
             <span className="text-xs">Home</span>
           </Link>
